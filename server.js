@@ -942,6 +942,57 @@ app.get("/api/minimax-status", async (req,res) => {
 });
 
 
+// ── VIDEO STATS ──
+app.post("/api/video-stats", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const { videoUrl } = req.body;
+    if(!videoUrl) return res.status(400).json({ error:"videoUrl is required" });
+    const idMatch = videoUrl.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if(!idMatch) return res.status(400).json({ error:"Invalid YouTube URL. Please paste a valid video link." });
+    const videoId = idMatch[1];
+    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+    const videoRes = await axios.get("https://www.googleapis.com/youtube/v3/videos", {
+      params: { part: "snippet,statistics,contentDetails", id: videoId, key: YOUTUBE_API_KEY }
+    });
+    if(!videoRes.data.items || !videoRes.data.items.length){
+      return res.status(404).json({ error:"Video not found. It may be private, deleted, or the link is incorrect." });
+    }
+    const video = videoRes.data.items[0];
+    const channelId = video.snippet.channelId;
+    const channelRes = await axios.get("https://www.googleapis.com/youtube/v3/channels", {
+      params: { part: "snippet,statistics", id: channelId, key: YOUTUBE_API_KEY }
+    });
+    const channel = channelRes.data.items[0];
+    return res.json({
+      success: true,
+      video: {
+        title: video.snippet.title,
+        description: video.snippet.description,
+        publishedAt: video.snippet.publishedAt,
+        tags: video.snippet.tags || [],
+        viewCount: video.statistics.viewCount || "0",
+        likeCount: video.statistics.likeCount || "0",
+        commentCount: video.statistics.commentCount || "0",
+        duration: video.contentDetails.duration,
+        thumbnail: video.snippet.thumbnails?.high?.url || video.snippet.thumbnails?.default?.url
+      },
+      channel: {
+        title: channel.snippet.title,
+        description: channel.snippet.description,
+        publishedAt: channel.snippet.publishedAt,
+        subscriberCount: channel.statistics.subscriberCount || "Hidden",
+        videoCount: channel.statistics.videoCount || "0",
+        viewCount: channel.statistics.viewCount || "0",
+        thumbnail: channel.snippet.thumbnails?.high?.url || channel.snippet.thumbnails?.default?.url
+      }
+    });
+  } catch(e){
+    console.error("Video stats error:", e.response?.data || e.message);
+    return res.status(500).json({ error:"Failed to fetch video stats. Please try again." });
+  }
+});
 // ── BALANCE ──
 app.get("/api/balance", async (req,res) => {
   const user = await verifyUser(req,res);
