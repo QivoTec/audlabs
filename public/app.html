@@ -742,6 +742,7 @@ Share on X
 </div>
 <div id="vg-status" class="vg-status"></div>
 <script src="https://checkout.flutterwave.com/v3.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -4693,6 +4694,12 @@ html += '<div style="color:#bbb;font-size:13px;">No matching videos found for th
 }
 html += '</div>';
 });
+window.currentSvAllClips = [];
+data.sections.forEach(function(section){
+  if(section.videos && section.videos.length > 0){
+    section.videos.forEach(function(video){ window.currentSvAllClips.push(video.downloadUrl); });
+  }
+});
 results.innerHTML = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button onclick="downloadAllClips()" style="background:#1a1a1a;border:none;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">↓ Download All Clips</button></div>' + html;
 showStatus("Found matching videos for your script!", "ok");
 } catch(e){
@@ -4746,12 +4753,29 @@ window.downloadAllSvSearchResults = async function(){
     showStatus("No clips to download.", "err");
     return;
   }
-  showStatus("Downloading "+window.currentSvSearchResults.length+" clips...", "");
-  for(var i = 0; i < window.currentSvSearchResults.length; i++){
-    await downloadSvClip(window.currentSvSearchResults[i].downloadUrl);
-    await new Promise(function(resolve){ setTimeout(resolve, 500); });
+  var total = window.currentSvSearchResults.length;
+  showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
+  try {
+    var zip = new JSZip();
+    for(var i = 0; i < total; i++){
+      var response = await fetch(window.currentSvSearchResults[i].downloadUrl);
+      var blob = await response.blob();
+      zip.file("clip_"+(i+1)+".mp4", blob);
+      showStatus("Preparing zip file — "+(i+1)+" of "+total+" clips fetched...", "");
+    }
+    showStatus("Compressing zip file...", "");
+    var zipBlob = await zip.generateAsync({type:"blob"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = "audlabs_clips_"+Date.now()+".zip";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showStatus("All "+total+" clips downloaded as a zip file!", "ok");
+  } catch(e){
+    showStatus("Zip download failed: " + e.message, "err");
   }
-  showStatus("All clips downloaded!", "ok");
 };
 window.refreshSvSection = async function(index, keyword){
 var newKeyword = prompt("Search for different footage for this section:", keyword);
@@ -4825,21 +4849,34 @@ showStatus("Similar videos loaded!", "ok");
 }
 } catch(e){ showStatus("Failed: "+e.message, "err"); }
 };
-window.downloadAllClips = function(){
-var links = document.querySelectorAll("#sv-results a[download]");
-if(!links.length){ showStatus("No clips to download", "err"); return; }
-var count = 0;
-links.forEach(function(a, i){
-setTimeout(function(){
-var tempA = document.createElement("a");
-tempA.href = a.href;
-tempA.download = "audlabs_clip_"+(i+1)+".mp4";
-tempA.target = "_blank";
-tempA.click();
-count++;
-if(count === links.length) showStatus("Downloading "+count+" clips!", "ok");
-}, i * 800);
-});
+window.downloadAllClips = async function(){
+  if(!window.currentSvAllClips || !window.currentSvAllClips.length){
+    showStatus("No clips to download.", "err");
+    return;
+  }
+  var total = window.currentSvAllClips.length;
+  showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
+  try {
+    var zip = new JSZip();
+    for(var i = 0; i < total; i++){
+      var response = await fetch(window.currentSvAllClips[i]);
+      var blob = await response.blob();
+      zip.file("clip_"+(i+1)+".mp4", blob);
+      showStatus("Preparing zip file — "+(i+1)+" of "+total+" clips fetched...", "");
+    }
+    showStatus("Compressing zip file...", "");
+    var zipBlob = await zip.generateAsync({type:"blob"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = "audlabs_clips_"+Date.now()+".zip";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showStatus("All "+total+" clips downloaded as a zip file!", "ok");
+  } catch(e){
+    showStatus("Zip download failed: " + e.message, "err");
+  }
 };
 window.toggleFavoriteClip = function(btn, url, photographer){
 var idx = savedClips.findIndex(function(c){ return c.url === url; });
