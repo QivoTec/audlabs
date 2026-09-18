@@ -4861,12 +4861,29 @@ html += '<div style="padding:10px;">';
 html += '<div style="font-size:11px;color:#999;margin-bottom:8px;">By '+clip.photographer+'</div>';
 html += '<div style="display:flex;gap:6px;">';
 html += '<button onclick="previewSvVideo(this)" data-src="'+clip.url+'" style="flex:1;background:#1a1a1a;border:none;color:#fff;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">▶ Preview</button>';
-html += '<a href="'+clip.url+'" download target="_blank" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;">↓ Download</a>';
+html += '<button onclick="downloadSvClip(\''+clip.url+'\')" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">↓ Download</button>';
 html += '<button onclick="toggleFavoriteClip(this,\''+clip.url+'\',\''+clip.photographer+'\')" style="background:#fff0f0;border:1.5px solid #ffcccc;color:#e74c3c;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;">♥</button>';
 html += '</div></div></div>';
 });
 html += '</div></div>';
 favResults.innerHTML = html;
+};
+window.downloadSvClip = async function(url){
+  try {
+    showStatus("Preparing download...", "");
+    var response = await fetch(url);
+    var blob = await response.blob();
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "audlabs_clip_"+Date.now()+".mp4";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showStatus("Video downloaded!", "ok");
+  } catch(e){
+    showStatus("Download failed. Please try again.", "err");
+  }
 };
 window.previewSvVideo = function(btn){
 var src = btn.dataset.src;
