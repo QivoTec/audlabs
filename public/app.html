@@ -4735,12 +4735,24 @@ html += '</div>';
 html += '</div>';
 });
 html += '</div></div>';
-results.innerHTML = html;
+window.currentSvSearchResults = data.videos;
+results.innerHTML = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button onclick="downloadAllSvSearchResults()" style="background:#1a1a1a;border:none;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">↓ Download All Clips</button></div>' + html;
 } catch(e){
 showStatus("Search failed: "+e.message, "err");
 }
 };
-
+window.downloadAllSvSearchResults = async function(){
+  if(!window.currentSvSearchResults || !window.currentSvSearchResults.length){
+    showStatus("No clips to download.", "err");
+    return;
+  }
+  showStatus("Downloading "+window.currentSvSearchResults.length+" clips...", "");
+  for(var i = 0; i < window.currentSvSearchResults.length; i++){
+    await downloadSvClip(window.currentSvSearchResults[i].downloadUrl);
+    await new Promise(function(resolve){ setTimeout(resolve, 500); });
+  }
+  showStatus("All clips downloaded!", "ok");
+};
 window.refreshSvSection = async function(index, keyword){
 var newKeyword = prompt("Search for different footage for this section:", keyword);
 if(!newKeyword) return;
