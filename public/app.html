@@ -3667,7 +3667,7 @@ window.searchMusic = async function(){
           '<div style="font-size:11px;color:#999;">by '+track.username+' · '+durLabel+' · '+track.license+'</div>'+
           '</div>'+
           '<div style="display:flex;gap:6px;align-items:center;">'+
-          '<audio controls src="'+track.previewUrl+'" style="height:32px;max-width:200px;"></audio>'+
+          '<audio controls controlsList="nodownload" src="'+track.previewUrl+'" style="height:32px;max-width:200px;"></audio>'+
           '<button onclick="downloadMusicTrack(\''+track.previewUrl+'\',\''+track.name.replace(/'/g,"").replace(/"/g,"")+'\')" style="background:linear-gradient(180deg,#2a2a2a,#1a1a1a);border:1px solid rgba(0,0,0,0.4);color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">⬇️ Download</button>'+
           '</div></div></div>';
       }).join("");
@@ -4682,7 +4682,7 @@ html += '<div style="padding:10px;">';
 html += '<div style="font-size:11px;color:#999;margin-bottom:8px;">By '+video.photographer+' · '+video.duration+'s · '+video.width+'x'+video.height+'</div>';
 html += '<div style="display:flex;gap:6px;">';
 html += '<button onclick="previewSvVideo(this)" data-src="'+video.url+'" style="flex:1;background:#1a1a1a;border:none;color:#fff;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">▶ Preview</button>';
-html += '<a href="'+video.downloadUrl+'" download target="_blank" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;">↓ Download</a>';html += '<button onclick="toggleFavoriteClip(this,\''+video.url+'\',\''+video.photographer+'\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#888;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;" title="Save to favorites">♡</button>';html += '<button onclick="findSimilarVideos(\''+section.keywords[0]+'\','+i+')" style="background:#f0f7ff;border:1.5px solid #cce0ff;color:#2c5aa0;padding:6px 8px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Similar</button>';
+html += '<button onclick="downloadSvClip(\''+video.downloadUrl+'\')" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">↓ Download</button>';html += '<button onclick="toggleFavoriteClip(this,\''+video.url+'\',\''+video.photographer+'\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#888;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;" title="Save to favorites">♡</button>';html += '<button onclick="findSimilarVideos(\''+section.keywords[0]+'\','+i+')" style="background:#f0f7ff;border:1.5px solid #cce0ff;color:#2c5aa0;padding:6px 8px;border-radius:6px;font-size:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Similar</button>';
 html += '</div>';
 html += '</div>';
 html += '</div>';
@@ -4728,7 +4728,7 @@ html += '<div style="padding:10px;">';
 html += '<div style="font-size:11px;color:#999;margin-bottom:8px;">By '+video.photographer+' · '+video.duration+'s · '+video.width+'x'+video.height+' · '+video.quality+'</div>';
 html += '<div style="display:flex;gap:6px;">';
 html += '<button onclick="previewSvVideo(this)" data-src="'+video.url+'" style="flex:1;background:#1a1a1a;border:none;color:#fff;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">▶ Preview</button>';
-html += '<a href="'+video.downloadUrl+'" download target="_blank" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;">↓ Download</a>';html += '<button onclick="toggleFavoriteClip(this,\''+video.url+'\',\''+video.photographer+'\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#888;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;" title="Save to favorites">♡</button>';
+html += '<button onclick="downloadSvClip(\''+video.downloadUrl+'\')" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">↓ Download</button>';html += '<button onclick="toggleFavoriteClip(this,\''+video.url+'\',\''+video.photographer+'\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#888;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;" title="Save to favorites">♡</button>';
 html += '<button onclick="copyText(\''+video.downloadUrl+'\',\'Video URL copied!\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#555;padding:6px 8px;border-radius:6px;font-size:11px;cursor:pointer;">🔗</button>';
 html += '</div>';
 html += '</div>';
@@ -4767,7 +4767,7 @@ html += '<div style="padding:10px;">';
 html += '<div style="font-size:11px;color:#999;margin-bottom:8px;">By '+video.photographer+' · '+video.duration+'s · '+video.width+'x'+video.height+'</div>';
 html += '<div style="display:flex;gap:6px;">';
 html += '<button onclick="previewSvVideo(this)" data-src="'+video.url+'" style="flex:1;background:#1a1a1a;border:none;color:#fff;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">▶ Preview</button>';
-html += '<a href="'+video.downloadUrl+'" download target="_blank" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;">↓ Download</a>';html += '<button onclick="toggleFavoriteClip(this,\''+video.url+'\',\''+video.photographer+'\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#888;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;" title="Save to favorites">♡</button>';
+html += '<button onclick="downloadSvClip(\''+video.downloadUrl+'\')" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">↓ Download</button>';html += '<button onclick="toggleFavoriteClip(this,\''+video.url+'\',\''+video.photographer+'\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#888;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;" title="Save to favorites">♡</button>';
 html += '</div></div></div>';
 });
 grid.innerHTML = html;
@@ -4803,7 +4803,7 @@ html += '<div style="padding:10px;">';
 html += '<div style="font-size:11px;color:#999;margin-bottom:8px;">By '+video.photographer+' · '+video.duration+'s</div>';
 html += '<div style="display:flex;gap:6px;">';
 html += '<button onclick="previewSvVideo(this)" data-src="'+video.url+'" style="flex:1;background:#1a1a1a;border:none;color:#fff;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">▶ Preview</button>';
-html += '<a href="'+video.downloadUrl+'" download target="_blank" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;">↓ Download</a>';
+html += '<button onclick="downloadSvClip(\''+video.downloadUrl+'\')" style="flex:1;background:#c9a84c;border:none;color:#111;padding:6px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">↓ Download</button>';
 html += '<button onclick="toggleFavoriteClip(this,\''+video.url+'\',\''+video.photographer+'\')" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#888;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;">♡</button>';
 html += '</div></div></div>';
 });
