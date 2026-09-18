@@ -115,6 +115,7 @@ Continue with Google
 <button class="vg-sb-item active" data-tab="generate"><svg class="icon" viewBox="0 0 18 18" fill="none"><path d="M3 5h12M3 9h8M3 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Text to Speech.</button>
 <button class="vg-sb-item" data-tab="clone"><svg class="icon" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M9 6v6M6 9h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Clone Voices.</button>
 <button class="vg-sb-item" data-tab="videostats"><svg class="icon" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 10l2-2 2 3 4-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Video Stats.</button>
+<button class="vg-sb-item" data-tab="musicfinder"><svg class="icon" viewBox="0 0 18 18" fill="none"><path d="M6 14V4l9-2v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="14" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="12" r="2" stroke="currentColor" stroke-width="1.5"/></svg>Music Finder.</button>
 <button class="vg-sb-item" data-tab="scriptvideos"><svg class="icon" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 7l4 2-4 2V7z" fill="currentColor"/></svg>Script To Videos.</button>
 <button class="vg-sb-item" data-tab="transcript"><svg class="icon" viewBox="0 0 18 18" fill="none"><path d="M3 4h12M3 7h12M3 10h8M3 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Transcript Extractor.</button>
 <button class="vg-sb-item" data-tab="translator"><svg class="icon" viewBox="0 0 18 18" fill="none"><path d="M3 5h6M6 3v2M6 5c0 3-2 5-4 6M4 8c1 1 2.5 1.5 4 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 15l3-8 3 8M11 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Language Translator.</button>
@@ -318,6 +319,28 @@ Share on X
 <div id="vs-tags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
 </div>
 </div>
+</div>
+</div>
+<!-- MUSIC FINDER --><div id="vg-tc-musicfinder" class="vg-tc">
+<div class="vg-card">
+<div class="vg-card-title"><span class="dot"></span>Music Finder</div>
+<p style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Search for free, royalty-free background music by keyword or mood. All results are CC0-licensed — free to use anywhere, no attribution required.</p>
+<div style="display:flex;gap:8px;margin-bottom:12px;">
+<input type="text" id="musicfinder-query" placeholder="e.g. cinematic travel, calm piano, upbeat corporate..." style="flex:1;padding:12px;background:#f5f5f5;border:1.5px solid #ebebeb;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;outline:none;color:#1a1a1a;">
+<button onclick="searchMusic()" id="musicfinder-btn" style="background:linear-gradient(180deg,#e8c97a 0%,#c9a84c 45%,#b8934a 100%);border:1px solid rgba(184,147,74,0.5);color:#111;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;position:relative;overflow:hidden;box-shadow:0 4px 14px rgba(201,168,76,0.35),inset 0 1px 0 rgba(255,255,255,0.5);">Search</button>
+</div>
+<div style="margin-bottom:16px;">
+<div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Duration</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+<button onclick="setMusicDuration(0,600,this)" class="mf-dur-btn sel-mf-dur" style="padding:6px 14px;border-radius:20px;border:1.5px solid #c9a84c;background:#c9a84c;color:#111;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Any</button>
+<button onclick="setMusicDuration(0,30,this)" class="mf-dur-btn" style="padding:6px 14px;border-radius:20px;border:1.5px solid #ebebeb;background:transparent;color:#888;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Under 30s</button>
+<button onclick="setMusicDuration(30,60,this)" class="mf-dur-btn" style="padding:6px 14px;border-radius:20px;border:1.5px solid #ebebeb;background:transparent;color:#888;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">30s - 1min</button>
+<button onclick="setMusicDuration(60,180,this)" class="mf-dur-btn" style="padding:6px 14px;border-radius:20px;border:1.5px solid #ebebeb;background:transparent;color:#888;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">1-3 min</button>
+<button onclick="setMusicDuration(180,600,this)" class="mf-dur-btn" style="padding:6px 14px;border-radius:20px;border:1.5px solid #ebebeb;background:transparent;color:#888;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">3min+</button>
+</div>
+</div>
+<div id="musicfinder-error" style="display:none;background:#fff3f3;border:1.5px solid #fcc;border-radius:8px;padding:16px;font-size:13px;color:#e74c3c;margin-bottom:16px;"></div>
+<div id="musicfinder-results"></div>
 </div>
 </div>
 <!-- TOPUP --><div id="vg-tc-topup" class="vg-tc"><div class="vg-card"><div class="vg-card-title"><span class="dot"></span>Your Credit Balance</div><div style="text-align:center;padding:20px 0;"><div style="font-size:48px;font-weight:700;color:#1a1a1a;" id="vg-big-credits">—</div><div style="font-size:13px;color:#999;margin-top:4px;">credits remaining</div><div style="font-size:12px;color:#bbb;margin-top:8px;">1 credit = 1 character</div></div></div><div class="vg-card"><div class="vg-card-title"><span class="dot"></span>Credit Packages — Bank Transfer (NGN)</div><div style="background:#fffdf7;border:1.5px solid #f0e5c0;border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px;color:#7a6230;">💡 Select a package, copy the exact Naira amount and transfer to your virtual account. Credits are added automatically.</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px;" id="topup-packages"><div class="topup-pkg" data-usd="32" data-credits="2600000" style="border:1.5px solid #ebebeb;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.15s;"><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Studio</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">2,600,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Lifetime Credits</div><div class="topup-ngn-price" data-usd="32" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div><div class="topup-pkg" data-usd="24" data-credits="1900000" style="border:1.5px solid #ebebeb;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.15s;"><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Pro</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">1,900,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Lifetime Credits</div><div class="topup-ngn-price" data-usd="24" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div><div class="topup-pkg sel-topup-pkg" data-usd="16" data-credits="1200000" style="border:2px solid #c9a84c;border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:#fffdf7;position:relative;"><div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#c9a84c;color:#111;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap;">MOST POPULAR</div><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Standard</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">1,200,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Lifetime Credits</div><div class="topup-ngn-price" data-usd="16" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div><div class="topup-pkg" data-usd="8" data-credits="500000" style="border:1.5px solid #ebebeb;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.15s;"><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Starter</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">500,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Lifetime Credits</div><div class="topup-ngn-price" data-usd="8" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div></div><div id="topup-selected-box" style="background:#fff8e6;border:1.5px solid #f0d080;border-radius:10px;padding:16px;margin-bottom:16px;display:none;"><div style="font-size:12px;color:#888;margin-bottom:6px;">Transfer exactly this amount:</div><div style="display:flex;align-items:center;gap:10px;"><div id="topup-exact-amount" style="font-size:28px;font-weight:700;color:#c9a84c;flex:1;">—</div><button onclick="copyTopupAmount()" style="background:#1a1a1a;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">📋 Copy</button></div><div style="font-size:12px;color:#bbb;margin-top:4px;" id="topup-credits-label">— credits</div></div><div class="vg-card-title" style="margin-top:4px;"><span class="dot"></span>Your Virtual Account</div><div id="vg-va-list"><div style="text-align:center;color:#bbb;font-size:13px;padding:20px;">Loading your virtual account...</div></div><button onclick="refreshBalance()" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#555;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;border-radius:8px;font-family:Inter,sans-serif;margin-top:12px;">↻ Refresh Balance</button></div></div>
@@ -2973,10 +2996,10 @@ setTimeout(function(){
     }catch(e){list.innerHTML='<div class="vg-empty"><p>Failed to load.</p></div>';}
   }
 
-  var tabRoutes={generate:"text-to-speech",transcript:"transcript-extractor",translator:"language-translator",thumbnail:"thumbnail-grabber",videostats:"video-stats",analytics:"analytics",scriptvideos:"script-to-videos",team:"create-team", clone:"clone-voices",history:"history",topup:"buy-credits",crypto:"buy-with-crypto",card:"buy-with-card",referral:"refer-earn",transactions:"transactions"};
+  var tabRoutes={generate:"text-to-speech",transcript:"transcript-extractor",translator:"language-translator",thumbnail:"thumbnail-grabber",videostats:"video-stats",musicfinder:"music-finder",analytics:"analytics",scriptvideos:"script-to-videos",team:"create-team", clone:"clone-voices",history:"history",topup:"buy-credits",crypto:"buy-with-crypto",card:"buy-with-card",referral:"refer-earn",transactions:"transactions"};
   var routeTabs={};Object.keys(tabRoutes).forEach(function(k){routeTabs[tabRoutes[k]]=k;});
-  var pageTitlesMap={generate:"Text to Speech",transcript:"Transcript Extractor",translator:"Language Translator",thumbnail:"Thumbnail Grabber",videostats:"Video Stats",analytics:"Analytics",clone:"Clone Voices",history:"History",topup:"Buy Credits",crypto:"Buy Credits",card:"Buy Credits",referral:"Affiliate Program",transactions:"Transactions",team:"Team"};
-  var pageSubMap={generate:"",transcript:"",analytics:"",scriptvideos:"",videostats:"",clone:"",history:"",topup:"",crypto:"",card:"",referral:"",transactions:"",team:""};
+  var pageTitlesMap={generate:"Text to Speech",transcript:"Transcript Extractor",translator:"Language Translator",thumbnail:"Thumbnail Grabber",videostats:"Video Stats",musicfinder:"Music Finder",analytics:"Analytics",clone:"Clone Voices",history:"History",topup:"Buy Credits",crypto:"Buy Credits",card:"Buy Credits",referral:"Affiliate Program",transactions:"Transactions",team:"Team"};
+  var pageSubMap={generate:"",transcript:"",analytics:"",scriptvideos:"",videostats:"",musicfinder:"",clone:"",history:"",topup:"",crypto:"",card:"",referral:"",transactions:"",team:""};
 
   function switchTab(tab){
     document.querySelectorAll(".vg-sb-item").forEach(function(b){b.classList.remove("active");});
@@ -3585,6 +3608,94 @@ window.translateScript = async function(){
   btn.disabled = false;
 };
 
+var musicMinDuration = 0;
+var musicMaxDuration = 600;
+window.setMusicDuration = function(min, max, btn){
+  musicMinDuration = min;
+  musicMaxDuration = max;
+  document.querySelectorAll(".mf-dur-btn").forEach(function(b){
+    b.classList.remove("sel-mf-dur");
+    b.style.background = "transparent";
+    b.style.color = "#888";
+    b.style.borderColor = "#ebebeb";
+  });
+  btn.classList.add("sel-mf-dur");
+  btn.style.background = "#c9a84c";
+  btn.style.color = "#111";
+  btn.style.borderColor = "#c9a84c";
+};
+window.searchMusic = async function(){
+  var query = document.getElementById("musicfinder-query").value.trim();
+  var errorDiv = document.getElementById("musicfinder-error");
+  var resultsDiv = document.getElementById("musicfinder-results");
+  var btn = document.getElementById("musicfinder-btn");
+  errorDiv.style.display = "none";
+  resultsDiv.innerHTML = "";
+  if(!query){
+    errorDiv.textContent = "Please enter a keyword or mood to search for.";
+    errorDiv.style.display = "block";
+    return;
+  }
+  btn.textContent = "Searching...";
+  btn.disabled = true;
+  try {
+    var token = await getToken();
+    var res = await fetch(BACKEND+"/api/music-finder", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify({ query: query, minDuration: musicMinDuration, maxDuration: musicMaxDuration })
+    });
+    var data = await res.json();
+    if(!data.success){
+      errorDiv.textContent = data.error || "Failed to search for music. Please try again.";
+      errorDiv.style.display = "block";
+      btn.textContent = "Search";
+      btn.disabled = false;
+      return;
+    }
+    if(!data.results.length){
+      resultsDiv.innerHTML = '<div class="vg-empty"><div class="big">🎵</div><p>No results found. Try a different keyword.</p></div>';
+    } else {
+      resultsDiv.innerHTML = data.results.map(function(track, i){
+        var mins = Math.floor(track.duration / 60);
+        var secs = track.duration % 60;
+        var durLabel = mins + ":" + (secs < 10 ? "0"+secs : secs);
+        return '<div class="vg-card" style="background:#fafafa;margin-bottom:10px;padding:14px;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">'+
+          '<div style="flex:1;min-width:150px;">'+
+          '<div style="font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:2px;">'+track.name.replace(/</g,"&lt;")+'</div>'+
+          '<div style="font-size:11px;color:#999;">by '+track.username+' · '+durLabel+' · '+track.license+'</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px;align-items:center;">'+
+          '<audio controls src="'+track.previewUrl+'" style="height:32px;max-width:200px;"></audio>'+
+          '<button onclick="downloadMusicTrack(\''+track.previewUrl+'\',\''+track.name.replace(/'/g,"").replace(/"/g,"")+'\')" style="background:linear-gradient(180deg,#2a2a2a,#1a1a1a);border:1px solid rgba(0,0,0,0.4);color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;">⬇️ Download</button>'+
+          '</div></div></div>';
+      }).join("");
+    }
+  } catch(e){
+    errorDiv.textContent = "Failed to search for music: " + e.message;
+    errorDiv.style.display = "block";
+  }
+  btn.textContent = "Search";
+  btn.disabled = false;
+};
+window.downloadMusicTrack = async function(url, name){
+  try {
+    showStatus("Preparing download...", "");
+    var response = await fetch(url);
+    var blob = await response.blob();
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "audlabs_"+name.replace(/[^a-z0-9]/gi,"_")+".mp3";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    showStatus("Music downloaded!", "ok");
+  } catch(e){
+    showStatus("Download failed. Please try again.", "err");
+  }
+};
 window.getVideoStats = async function(){
   var url = document.getElementById("videostats-url").value.trim();
   var resultDiv = document.getElementById("videostats-result");
