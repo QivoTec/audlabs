@@ -1031,6 +1031,39 @@ app.post("/api/music-finder", async (req,res) => {
     return res.status(500).json({ error:"Failed to search for music. Please try again." });
   }
 });
+// ── DEDUCT CREDITS FOR VIDEO CLIP DOWNLOAD ──
+app.post("/api/deduct-clip-credits", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const { type } = req.body;
+    const CLIP_COST = type === "all" ? 10000 : 2000;
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const teamId = userDoc.data()?.teamId;
+    let isTeamMember = false;
+    if(teamId){
+      const teamDoc = await db.collection("teams").doc(teamId).get();
+      if(teamDoc.exists){
+        const team = teamDoc.data();
+        if(team.credits === -1 || team.credits > 0) isTeamMember = true;
+      }
+    }
+    if(!isTeamMember){
+      const currentCredits = userDoc.data()?.credits || 0;
+      if(currentCredits < CLIP_COST){
+        return res.status(402).json({ error: "Insufficient credits. You need "+CLIP_COST.toLocaleString()+" credits for this download." });
+      }
+      await db.collection("users").doc(user.uid).update({
+        credits: admin.firestore.FieldValue.increment(-CLIP_COST)
+      });
+    }
+    const updatedDoc = await db.collection("users").doc(user.uid).get();
+    return res.json({ success: true, remaining: updatedDoc.data()?.credits || 0, cost: CLIP_COST });
+  } catch(e){
+    console.error("Clip download deduct error:", e.message);
+    return res.status(500).json({ error: "Failed to process download. Please try again." });
+  }
+});
 // ── DEDUCT CREDITS FOR MUSIC DOWNLOAD ──
 app.post("/api/deduct-music-credits", async (req,res) => {
   const user = await verifyUser(req,res);
