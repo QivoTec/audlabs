@@ -989,8 +989,46 @@ app.post("/api/video-stats", async (req,res) => {
       }
     });
   } catch(e){
-    console.error("Video stats error:", e.response?.data || e.message);
+        console.error("Video stats error:", e.response?.data || e.message);
     return res.status(500).json({ error:"Failed to fetch video stats. Please try again." });
+  }
+});
+// ── MUSIC FINDER ──
+app.post("/api/music-finder", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const { query, minDuration, maxDuration } = req.body;
+    if(!query) return res.status(400).json({ error:"query is required" });
+    const FREESOUND_API_KEY = process.env.FREESOUND_API_KEY;
+    const minDur = minDuration || 0;
+    const maxDur = maxDuration || 600;
+    const searchQuery = query.toLowerCase().includes("music") ? query : query + " music";
+    const filterStr = `duration:[${minDur} TO ${maxDur}] license:"Creative Commons 0"`;
+    const searchRes = await axios.get("https://freesound.org/apiv2/search/text/", {
+      params: {
+        query: searchQuery,
+        filter: filterStr,
+        fields: "id,name,duration,previews,tags,username,license,download",
+        page_size: 20,
+        token: FREESOUND_API_KEY
+      }
+    });
+    const results = (searchRes.data.results || []).map(function(track){
+      return {
+        id: track.id,
+        name: track.name,
+        duration: Math.round(track.duration),
+        previewUrl: track.previews["preview-hq-mp3"] || track.previews["preview-lq-mp3"],
+        tags: track.tags || [],
+        username: track.username,
+        license: "CC0 (Free to use)"
+      };
+    });
+    return res.json({ success: true, results: results, count: searchRes.data.count });
+  } catch(e){
+    console.error("Music finder error:", e.response?.data || e.message);
+    return res.status(500).json({ error:"Failed to search for music. Please try again." });
   }
 });
 // ── BALANCE ──
