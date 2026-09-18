@@ -1031,8 +1031,39 @@ app.post("/api/music-finder", async (req,res) => {
     return res.status(500).json({ error:"Failed to search for music. Please try again." });
   }
 });
+// ── DEDUCT CREDITS FOR MUSIC DOWNLOAD ──
+app.post("/api/deduct-music-credits", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const MUSIC_DOWNLOAD_COST = 3000;
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const teamId = userDoc.data()?.teamId;
+    let isTeamMember = false;
+    if(teamId){
+      const teamDoc = await db.collection("teams").doc(teamId).get();
+      if(teamDoc.exists){
+        const team = teamDoc.data();
+        if(team.credits === -1 || team.credits > 0) isTeamMember = true;
+      }
+    }
+    if(!isTeamMember){
+      const currentCredits = userDoc.data()?.credits || 0;
+      if(currentCredits < MUSIC_DOWNLOAD_COST){
+        return res.status(402).json({ error: "Insufficient credits. You need "+MUSIC_DOWNLOAD_COST.toLocaleString()+" credits to download a track." });
+      }
+      await db.collection("users").doc(user.uid).update({
+        credits: admin.firestore.FieldValue.increment(-MUSIC_DOWNLOAD_COST)
+      });
+    }
+    const updatedDoc = await db.collection("users").doc(user.uid).get();
+    return res.json({ success: true, remaining: updatedDoc.data()?.credits || 0 });
+  } catch(e){
+    console.error("Music download deduct error:", e.message);
+    return res.status(500).json({ error: "Failed to process download. Please try again." });
+  }
+});
 // ── BALANCE ──
-app.get("/api/balance", async (req,res) => {
   const user = await verifyUser(req,res);
   if (!user) return;
   try {
