@@ -324,7 +324,7 @@ Share on X
 <!-- MUSIC FINDER --><div id="vg-tc-musicfinder" class="vg-tc">
 <div class="vg-card">
 <div class="vg-card-title"><span class="dot"></span>Music Finder</div>
-<p style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Search for free, royalty-free background music by keyword or mood. All results are CC0-licensed — free to use anywhere, no attribution required.</p>
+<p style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Search and preview royalty-free background music and sounds for free. Downloads cost 3,000 credits per track — all results are CC0-licensed, free to use anywhere, no attribution required.</p>
 <div style="display:flex;gap:8px;margin-bottom:12px;">
 <input type="text" id="musicfinder-query" placeholder="e.g. cinematic travel, calm piano, upbeat corporate..." style="flex:1;padding:12px;background:#f5f5f5;border:1.5px solid #ebebeb;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;outline:none;color:#1a1a1a;">
 <button onclick="searchMusic()" id="musicfinder-btn" style="background:linear-gradient(180deg,#e8c97a 0%,#c9a84c 45%,#b8934a 100%);border:1px solid rgba(184,147,74,0.5);color:#111;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;position:relative;overflow:hidden;box-shadow:0 4px 14px rgba(201,168,76,0.35),inset 0 1px 0 rgba(255,255,255,0.5);">Search</button>
@@ -3680,8 +3680,25 @@ window.searchMusic = async function(){
   btn.disabled = false;
 };
 window.downloadMusicTrack = async function(url, name){
+  var MUSIC_DOWNLOAD_COST = 3000;
+  if(userCredits < MUSIC_DOWNLOAD_COST && !userTeamId){
+    showStatus("Not enough credits. You need "+MUSIC_DOWNLOAD_COST.toLocaleString()+" credits to download this track. Please top up.", "err");
+    switchToTopup();
+    return;
+  }
   try {
     showStatus("Preparing download...", "");
+    var token = await getToken();
+    var deductRes = await fetch(BACKEND+"/api/deduct-music-credits", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token}
+    });
+    var deductData = await deductRes.json();
+    if(!deductRes.ok){
+      showStatus(deductData.error || "Failed to process download.", "err");
+      return;
+    }
+    if(deductData.remaining !== undefined){ userCredits = deductData.remaining; renderCreditsBar(); }
     var response = await fetch(url);
     var blob = await response.blob();
     var a = document.createElement("a");
@@ -3691,7 +3708,7 @@ window.downloadMusicTrack = async function(url, name){
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-    showStatus("Music downloaded!", "ok");
+    showStatus("Music downloaded! "+MUSIC_DOWNLOAD_COST.toLocaleString()+" credits used.", "ok");
   } catch(e){
     showStatus("Download failed. Please try again.", "err");
   }
