@@ -500,7 +500,7 @@ Share on X
 <div id="vg-tc-scriptvideos" class="vg-tc">
 <div class="vg-card">
 <div class="vg-card-title"><span class="dot"></span>Script To Videos</div>
-<div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Paste your script below and we will find matching HD video clips for every paragraph — completely free.</div>
+<div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Paste your script below and we will find matching HD video clips for every paragraph — completely free to search. Downloading a single clip costs 2,000 credits; downloading all clips at once costs 10,000 credits.</div>
 <div style="margin-bottom:14px;">
 <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Niche Presets</div>
 <div style="display:flex;flex-wrap:wrap;gap:8px;">
@@ -4753,6 +4753,29 @@ window.downloadAllSvSearchResults = async function(){
     showStatus("No clips to download.", "err");
     return;
   }
+  var ALL_CLIPS_COST = 10000;
+  if(userCredits < ALL_CLIPS_COST && !userTeamId){
+    showStatus("Not enough credits. You need "+ALL_CLIPS_COST.toLocaleString()+" credits to download all clips. Please top up.", "err");
+    switchToTopup();
+    return;
+  }
+  try {
+    var token = await getToken();
+    var deductRes = await fetch(BACKEND+"/api/deduct-clip-credits", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify({ type: "all" })
+    });
+    var deductData = await deductRes.json();
+    if(!deductRes.ok){
+      showStatus(deductData.error || "Failed to process download.", "err");
+      return;
+    }
+    if(deductData.remaining !== undefined){ userCredits = deductData.remaining; renderCreditsBar(); }
+  } catch(deductErr){
+    showStatus("Failed to process download: " + deductErr.message, "err");
+    return;
+  }
   var total = window.currentSvSearchResults.length;
   showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
   try {
@@ -4772,7 +4795,7 @@ window.downloadAllSvSearchResults = async function(){
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-    showStatus("All "+total+" clips downloaded as a zip file!", "ok");
+        showStatus("All "+total+" clips downloaded as a zip file! "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
   } catch(e){
     showStatus("Zip download failed: " + e.message, "err");
   }
@@ -4854,6 +4877,29 @@ window.downloadAllClips = async function(){
     showStatus("No clips to download.", "err");
     return;
   }
+  var ALL_CLIPS_COST = 10000;
+  if(userCredits < ALL_CLIPS_COST && !userTeamId){
+    showStatus("Not enough credits. You need "+ALL_CLIPS_COST.toLocaleString()+" credits to download all clips. Please top up.", "err");
+    switchToTopup();
+    return;
+  }
+  try {
+    var token = await getToken();
+    var deductRes = await fetch(BACKEND+"/api/deduct-clip-credits", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify({ type: "all" })
+    });
+    var deductData = await deductRes.json();
+    if(!deductRes.ok){
+      showStatus(deductData.error || "Failed to process download.", "err");
+      return;
+    }
+    if(deductData.remaining !== undefined){ userCredits = deductData.remaining; renderCreditsBar(); }
+  } catch(deductErr){
+    showStatus("Failed to process download: " + deductErr.message, "err");
+    return;
+  }
   var total = window.currentSvAllClips.length;
   showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
   try {
@@ -4873,7 +4919,7 @@ window.downloadAllClips = async function(){
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-    showStatus("All "+total+" clips downloaded as a zip file!", "ok");
+        showStatus("All "+total+" clips downloaded as a zip file! "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
   } catch(e){
     showStatus("Zip download failed: " + e.message, "err");
   }
@@ -4918,18 +4964,36 @@ html += '</div></div>';
 favResults.innerHTML = html;
 };
 window.downloadSvClip = async function(url){
+  var CLIP_COST = 2000;
+  if(userCredits < CLIP_COST && !userTeamId){
+    showStatus("Not enough credits. You need "+CLIP_COST.toLocaleString()+" credits to download this clip. Please top up.", "err");
+    switchToTopup();
+    return;
+  }
   try {
+    var token = await getToken();
+    var deductRes = await fetch(BACKEND+"/api/deduct-clip-credits", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify({ type: "single" })
+    });
+    var deductData = await deductRes.json();
+    if(!deductRes.ok){
+      showStatus(deductData.error || "Failed to process download.", "err");
+      return;
+    }
+    if(deductData.remaining !== undefined){ userCredits = deductData.remaining; renderCreditsBar(); }
     showStatus("Preparing download...", "");
-    var response = await fetch(url);
+    var response = await fetch(url);;
     var blob = await response.blob();
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "audlabs_clip_"+Date.now()+".mp4";
+        a.download = "audlabs_clip_"+Date.now()+".mp4";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-    showStatus("Video downloaded!", "ok");
+    showStatus("Video downloaded! "+CLIP_COST.toLocaleString()+" credits used.", "ok");
   } catch(e){
     showStatus("Download failed. Please try again.", "err");
   }
