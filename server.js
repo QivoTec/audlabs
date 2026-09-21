@@ -4712,9 +4712,18 @@ app.post("/api/admin/send-credit-expiry-notice", async (req,res) => {
   const isAdmin = req.headers["x-admin-secret"] === "audlabs-admin-2026";
   if(!isAdmin) return res.status(401).json({ error:"Unauthorized" });
   try {
-    const { uids, expiryDate } = req.body;
-    if(!uids || !Array.isArray(uids) || !uids.length) return res.status(400).json({ error:"uids array is required" });
+        const { uids, expiryDate, testEmail, testName, testCredits } = req.body;
     if(!expiryDate) return res.status(400).json({ error:"expiryDate is required" });
+    if(testEmail){
+      await audlabsTransporter.sendMail({
+        from: '"AudLabs" <hello@audlabs.io>',
+        to: testEmail,
+        subject: "[TEST] Important: Your AudLabs credits are expiring soon",
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:20px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);"><tr><td style="background:#0a1628;padding:24px 32px;text-align:left;"><span style="font-size:22px;font-weight:700;color:#c9a84c;letter-spacing:1px;">AudLabs</span></td></tr><tr><td style="padding:32px;"><p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Hi ${testName||"there"},</p><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">I wanted to reach out to you personally about something important regarding your AudLabs account.</p><div style="background:#fffdf7;border:1.5px solid #f0e5c0;border-radius:8px;padding:16px 20px;margin-bottom:16px;"><p style="font-size:14px;color:#333;line-height:1.8;margin:0;">You currently have <strong>${(testCredits||0).toLocaleString()} credits</strong> sitting unused, and I want to be upfront with you: as part of moving AudLabs to a more sustainable model, these credits will now expire 30 days from today — specifically on <strong>${expiryDate}</strong>.</p></div><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">I know this is a change from what was originally promised, and I'm sorry for that. The honest reason is that keeping credits available forever isn't something the platform can sustain long-term, and this change lets us keep AudLabs reliable and consistently available for everyone, including you.</p><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">If you have any content plans coming up, I'd genuinely encourage you to put these credits to use before ${expiryDate}. And if you have any concerns or this creates a real problem for you, please just reply — I want to work with you directly on this, not just spring it on you.</p><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 24px;">Thank you for being part of AudLabs from early on. I appreciate you.</p><p style="font-size:14px;color:#555;line-height:1.7;margin:0 0 4px;">Regards,</p><p style="font-size:15px;color:#333;margin:0;"><strong>Adeyemo Oluwaseyi</strong><br><span style="font-size:13px;color:#888;">Founder, AudLabs</span></p></td></tr><tr><td style="background:#f8f9fa;padding:16px 32px;border-top:1px solid #eee;"><p style="font-size:11px;color:#bbb;margin:0;text-align:center;">AudLabs · audlabs.io</p></td></tr></table></td></tr></table></body></html>`
+      });
+      return res.json({ success:true, test:true });
+    }
+    if(!uids || !Array.isArray(uids) || !uids.length) return res.status(400).json({ error:"uids array is required" });
     let sentCount = 0;
     let failedEmails = [];
     for(const uid of uids){
