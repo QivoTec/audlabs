@@ -4726,7 +4726,7 @@ app.post("/api/admin/send-credit-expiry-notice", async (req,res) => {
     if(!uids || !Array.isArray(uids) || !uids.length) return res.status(400).json({ error:"uids array is required" });
     let sentCount = 0;
     let failedEmails = [];
-    for(const uid of uids){
+        for(const uid of uids){
       try {
         const userDoc = await db.collection("users").doc(uid).get();
         if(!userDoc.exists) continue;
@@ -4735,6 +4735,7 @@ app.post("/api/admin/send-credit-expiry-notice", async (req,res) => {
         const name = userData.displayName || (email ? email.split("@")[0] : "there");
         const credits = userData.credits || 0;
         if(!email) continue;
+        await new Promise(function(resolve){ setTimeout(resolve, 150); });
         await audlabsTransporter.sendMail({
           from: '"AudLabs" <hello@audlabs.io>',
           to: email,
