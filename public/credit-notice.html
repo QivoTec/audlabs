@@ -64,6 +64,11 @@ body{background:#0d0d0d;color:#eee;font-family:'Inter',sans-serif;min-height:100
     <label>Expiry date to show in the email:</label>
     <input type="text" id="expiry-date" placeholder="e.g. October 21, 2026" value="October 21, 2026">
   </div>
+  <div class="expiry-input-row">
+    <label>Send a test to your own email:</label>
+    <input type="email" id="test-email" placeholder="your@email.com" style="flex:1;">
+    <button class="btn btn-outline" onclick="sendTestNotice()">Send Test</button>
+  </div>
 
   <div id="loading" style="text-align:center;color:#888;padding:40px;">Loading users with 25,000+ credits...</div>
   <div id="user-list-container" style="display:none;">
@@ -140,6 +145,26 @@ function updateSelectedCount(){
   document.getElementById("selected-count").textContent = count + " selected";
 }
 
+async function sendTestNotice(){
+  const testEmail = document.getElementById("test-email").value.trim();
+  const expiryDate = document.getElementById("expiry-date").value.trim();
+  const statusEl = document.getElementById("status");
+  if(!testEmail){ alert("Please enter your email to send a test."); return; }
+  if(!expiryDate){ alert("Please enter an expiry date."); return; }
+  try{
+    const res = await fetch(BACKEND + "/api/admin/send-credit-expiry-notice", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","x-admin-secret":adminPassword},
+      body: JSON.stringify({ uids: [], expiryDate: expiryDate, testEmail: testEmail, testName: "there", testCredits: 42000 })
+    });
+    const data = await res.json();
+    statusEl.className = data.success ? "status-msg status-ok" : "status-msg status-err";
+    statusEl.textContent = data.success ? "Test email sent to " + testEmail + "!" : (data.error || "Failed to send test.");
+    statusEl.style.display = "block";
+  }catch(e){
+    statusEl.className = "status-msg status-err"; statusEl.textContent = "Error: " + e.message; statusEl.style.display = "block";
+  }
+}
 async function sendNotices(){
   const selected = Array.from(document.querySelectorAll(".user-checkbox:checked")).map(function(cb){ return cb.dataset.uid; });
   const expiryDate = document.getElementById("expiry-date").value.trim();
