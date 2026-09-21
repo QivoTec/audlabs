@@ -2667,9 +2667,13 @@ app.post("/api/generate-voice", async (req,res) => {
         }
       }
     }
-    // Only check individual credits if not a team member
+        // Only check individual credits if not a team member
     if(!isTeamMember){
-      const individualCredits = userDoc.data()?.credits || 0;
+      const legacyCredits = userDoc.data()?.credits || 0;
+      let monthlyCredits = userDoc.data()?.monthlyCredits || 0;
+      const monthlyExpiresAt = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
+      if(monthlyExpiresAt && monthlyExpiresAt < new Date()) monthlyCredits = 0;
+      const individualCredits = legacyCredits + monthlyCredits;
       const cost = text.length;
       if(!user.email_verified){
         return res.status(403).json({ error:"Please verify your email address before generating. Check your inbox for the verification link." });
