@@ -178,26 +178,37 @@ async function sendNotices(){
     statusEl.className = "status-msg status-err"; statusEl.textContent = "Please enter an expiry date."; statusEl.style.display = "block";
     return;
   }
-  if(!confirm("Send credit expiry notice to " + selected.length + " user(s)? This cannot be undone.")) return;
+  if(!confirm("Send credit expiry notice to " + selected.length + " user(s) in batches of 50? This cannot be undone.")) return;
   btn.disabled = true;
-  btn.textContent = "Sending...";
-  try{
-    const res = await fetch(BACKEND + "/api/admin/send-credit-expiry-notice", {
-      method: "POST",
-      headers: {"Content-Type":"application/json","x-admin-secret":adminPassword},
-      body: JSON.stringify({ uids: selected, expiryDate: expiryDate })
-    });
-    const data = await res.json();
-    if(data.success){
-      statusEl.className = "status-msg status-ok";
-      statusEl.textContent = "Sent to " + data.sentCount + " user(s)." + (data.failedCount ? " " + data.failedCount + " failed." : "");
-      statusEl.style.display = "block";
-    } else {
-      statusEl.className = "status-msg status-err"; statusEl.textContent = data.error || "Failed to send notices."; statusEl.style.display = "block";
-    }
-  }catch(e){
-    statusEl.className = "status-msg status-err"; statusEl.textContent = "Error: " + e.message; statusEl.style.display = "block";
+  const BATCH_SIZE = 50;
+  const batches = [];
+  for(let i = 0; i < selected.length; i += BATCH_SIZE){
+    batches.push(selected.slice(i, i + BATCH_SIZE));
   }
+  let totalSent = 0;
+  let totalFailed = 0;
+  statusEl.className = "status-msg status-ok"; statusEl.style.display = "block";
+  for(let b = 0; b < batches.length; b++){
+    btn.textContent = "Sending batch " + (b+1) + " of " + batches.length + "...";
+    statusEl.textContent = "Sending batch " + (b+1) + " of " + batches.length + " (" + batches[b].length + " users)...";
+    try{
+      const res = await fetch(BACKEND + "/api/admin/send-credit-expiry-notice", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","x-admin-secret":adminPassword},
+        body: JSON.stringify({ uids: batches[b], expiryDate: expiryDate })
+      });
+      const data = await res.json();
+      if(data.success){
+        totalSent += data.sentCount;
+        totalFailed += data.failedCount || 0;
+      } else {
+        totalFailed += batches[b].length;
+      }
+    }catch(e){
+      totalFailed += batches[b].length;
+    }
+  }
+  statusEl.textContent = "Done! Sent to " + totalSent + " user(s)." + (totalFailed ? " " + totalFailed + " failed." : "");
   btn.disabled = false;
   btn.textContent = "Send Notice to Selected Users";
 }
