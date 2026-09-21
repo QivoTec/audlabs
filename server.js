@@ -224,6 +224,37 @@ async function uploadAudioToStorage(audioBuffer, uid, mimeType){
     return null;
   }
 }
+async function addMonthlyCredits(uid, amount) {
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + 30);
+  await db.collection("users").doc(uid).update({
+    monthlyCredits: admin.firestore.FieldValue.increment(amount),
+    monthlyCreditsExpiresAt: admin.firestore.Timestamp.fromDate(expiryDate),
+    hasPurchased: true
+  });
+}
+async function deductUserCredits(uid, cost) {
+  const ref = db.collection("users").doc(uid);
+  const doc = await ref.get();
+  const data = doc.exists ? doc.data() : {};
+  let monthlyCredits = data.monthlyCredits || 0;
+  let legacyCredits = data.credits || 0;
+  const expiresAt = data.monthlyCreditsExpiresAt ? data.monthlyCreditsExpiresAt.toDate() : null;
+  const isExpired = expiresAt && expiresAt < new Date();
+  if(isExpired){ monthlyCredits = 0; }
+  const totalAvailable = monthlyCredits + legacyCredits;
+  if(totalAvailable < cost){
+    return { success: false, available: totalAvailable };
+  }
+  const fromMonthly = Math.min(monthlyCredits, cost);
+  const fromLegacy = cost - fromMonthly;
+  const updates = {
+    monthlyCredits: monthlyCredits - fromMonthly,
+    credits: legacyCredits - fromLegacy
+  };
+  await ref.update(updates);
+  return { success: true, remaining: (monthlyCredits - fromMonthly) + (legacyCredits - fromLegacy) };
+}
 async function verifyUser(req, res) {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ")) { res.status(401).json({ error:"Unauthorized" }); return null; }
@@ -1048,17 +1079,15 @@ app.post("/api/deduct-clip-credits", async (req,res) => {
         if(team.credits === -1 || team.credits > 0) isTeamMember = true;
       }
     }
+        let remaining = 999999999;
     if(!isTeamMember){
-      const currentCredits = userDoc.data()?.credits || 0;
-      if(currentCredits < CLIP_COST){
+      const deductResult = await deductUserCredits(user.uid, CLIP_COST);
+      if(!deductResult.success){
         return res.status(402).json({ error: "Insufficient credits. You need "+CLIP_COST.toLocaleString()+" credits for this download." });
       }
-      await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(-CLIP_COST)
-      });
+      remaining = deductResult.remaining;
     }
-    const updatedDoc = await db.collection("users").doc(user.uid).get();
-    return res.json({ success: true, remaining: updatedDoc.data()?.credits || 0, cost: CLIP_COST });
+    return res.json({ success: true, remaining: remaining, cost: CLIP_COST });
   } catch(e){
     console.error("Clip download deduct error:", e.message);
     return res.status(500).json({ error: "Failed to process download. Please try again." });
@@ -1080,17 +1109,15 @@ app.post("/api/deduct-music-credits", async (req,res) => {
         if(team.credits === -1 || team.credits > 0) isTeamMember = true;
       }
     }
+    let remaining = 999999999;
     if(!isTeamMember){
-      const currentCredits = userDoc.data()?.credits || 0;
-      if(currentCredits < MUSIC_DOWNLOAD_COST){
+      const deductResult = await deductUserCredits(user.uid, MUSIC_DOWNLOAD_COST);
+      if(!deductResult.success){
         return res.status(402).json({ error: "Insufficient credits. You need "+MUSIC_DOWNLOAD_COST.toLocaleString()+" credits to download a track." });
       }
-      await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(-MUSIC_DOWNLOAD_COST)
-      });
+      remaining = deductResult.remaining;
     }
-    const updatedDoc = await db.collection("users").doc(user.uid).get();
-    return res.json({ success: true, remaining: updatedDoc.data()?.credits || 0 });
+    return res.json({ success: true, remaining: remaining });
   } catch(e){
     console.error("Music download deduct error:", e.message);
     return res.status(500).json({ error: "Failed to process download. Please try again." });
@@ -1103,9 +1130,17 @@ app.get("/api/balance", async (req,res) => {
   try {
     const doc = await db.collection("users").doc(user.uid).get();
     if (!doc.exists) return res.json({ credits:0, virtualAccount:null });
-    const d = doc.data();
+        const d = doc.data();
+    let monthlyCredits = d.monthlyCredits || 0;
+    const expiresAt = d.monthlyCreditsExpiresAt ? d.monthlyCreditsExpiresAt.toDate() : null;
+    const isMonthlyExpired = expiresAt && expiresAt < new Date();
+    if(isMonthlyExpired) monthlyCredits = 0;
+    const legacyCredits = d.credits || 0;
     return res.json({
-      credits: d.credits||0,
+      credits: monthlyCredits + legacyCredits,
+      monthlyCredits: monthlyCredits,
+      legacyCredits: legacyCredits,
+      monthlyCreditsExpiresAt: (expiresAt && !isMonthlyExpired) ? expiresAt.toISOString() : null,
       virtualAccount: d.virtualAccount||null,
       virtualAccounts: d.virtualAccount ? [d.virtualAccount] : [],
       referralCode: d.referralCode||"",
@@ -1284,11 +1319,10 @@ app.post("/api/deduct-credits", async (req,res) => {
         }
       }
     }
-    // Individual credits
-    const current = doc.exists?(doc.data().credits||0):0;
-    if (current<cost) return res.status(402).json({ error:"Insufficient credits", required:cost, available:current });
+        // Individual credits (monthly pool first, then legacy lifetime pool)
+    const deductResult = await deductUserCredits(user.uid, cost);
+    if(!deductResult.success) return res.status(402).json({ error:"Insufficient credits", required:cost, available:deductResult.available });
     await ref.update({ 
-  credits: admin.firestore.FieldValue.increment(-cost),
   totalCharacters: admin.firestore.FieldValue.increment(characters),
   totalGenerations: admin.firestore.FieldValue.increment(1),
   [`voiceCount.${voiceName}`]: admin.firestore.FieldValue.increment(1),
@@ -1298,7 +1332,7 @@ app.post("/api/deduct-credits", async (req,res) => {
       note:`Voiceover — ${voiceName||"Unknown"}`,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
-    return res.json({ success:true, creditsUsed:cost, remaining:current-cost });
+    return res.json({ success:true, creditsUsed:cost, remaining:deductResult.remaining });
   } catch(e) { return res.status(500).json({ error:e.message }); }
 });
 
@@ -1366,10 +1400,7 @@ app.post("/api/flutterwave-webhook", express.raw({ type:"*/*" }), async (req,res
     } catch(rateErr){
       creditsToAdd = Math.floor(amountPaid / 1600 * 100000);
     }
-    await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(creditsToAdd),
-        hasPurchased: true,
-      });
+        await addMonthlyCredits(uid, creditsToAdd);
     const today = new Date().toISOString().split("T")[0];
     const amountUSD = amountPaid / 1400;
     await db.collection("stats").doc("revenue").set({
@@ -1606,10 +1637,7 @@ app.post("/api/paystack-webhook", express.raw({ type:"*/*" }), async (req,res) =
       creditsToAdd = Math.floor(amountPaid / 1600 * 100000);
       console.log("Rate fetch failed, fallback credits:", creditsToAdd);
     }
-    await db.collection("users").doc(uid).update({
-      credits: admin.firestore.FieldValue.increment(creditsToAdd),
-      hasPurchased: true,
-    });
+        await addMonthlyCredits(uid, creditsToAdd);
 const today = new Date().toISOString().split("T")[0];
     const amountUSD = amountPaid / 1400;
     await db.collection("stats").doc("revenue").set({
@@ -1685,11 +1713,8 @@ app.post("/api/crypto-webhook", express.raw({ type:"*/*" }), async (req,res) => 
     const payData = payDoc.data();
     if (payData.status === "completed") return res.json({ received:true, duplicate:true });
 
-    const creditsToAdd = payData.creditsAmount;
-    await db.collection("users").doc(payData.uid).update({
-      credits: admin.firestore.FieldValue.increment(creditsToAdd),
-      hasPurchased: true,
-    });
+        const creditsToAdd = payData.creditsAmount;
+    await addMonthlyCredits(payData.uid, creditsToAdd);
 const today = new Date().toISOString().split("T")[0];
     await db.collection("stats").doc("revenue").set({
       totalUSD: admin.firestore.FieldValue.increment(payData.amountUSD || 0),
@@ -1864,11 +1889,9 @@ app.get("/api/check-crypto-payment", async (req,res) => {
       if (!paySnap.empty) {
         const payData = paySnap.docs[0].data();
         const orderId = paySnap.docs[0].id;
-        if (payData.status !== "completed") {
+                if (payData.status !== "completed") {
           const creditsToAdd = payData.creditsAmount;
-          await db.collection("users").doc(user.uid).update({
-            credits: admin.firestore.FieldValue.increment(creditsToAdd)
-          });
+          await addMonthlyCredits(user.uid, creditsToAdd);
           await db.collection("users").doc(user.uid).collection("transactions").add({
             type:"credit", amount:creditsToAdd,
             note:`Crypto top-up — $${payData.amountUSD} USDT — ${creditsToAdd.toLocaleString()} credits`,
@@ -3126,12 +3149,9 @@ app.post("/api/flutterwave-webhook", express.raw({ type:"*/*" }), async (req,res
     const payData = payDoc.data();
     if (payData.status === "completed") return res.json({ received:true, duplicate:true });
  // Credit user
-    const creditsToAdd = payData.creditsAmount;
+        const creditsToAdd = payData.creditsAmount;
 
-    await db.collection("users").doc(payData.uid).update({
-      credits: admin.firestore.FieldValue.increment(creditsToAdd),
-      hasPurchased: true,
-    });
+    await addMonthlyCredits(payData.uid, creditsToAdd);
 const today = new Date().toISOString().split("T")[0];
     await db.collection("stats").doc("revenue").set({
       totalUSD: admin.firestore.FieldValue.increment(payData.amountUSD || 0),
@@ -3189,10 +3209,8 @@ app.post("/api/verify-card-payment", async (req,res) => {
       if (!payDoc.exists) return res.status(400).json({ error:"Payment not found" });
       const payData = payDoc.data();
       if (payData.status === "completed") return res.json({ success:true, alreadyCredited:true });
-      const creditsToAdd = payData.creditsAmount;
-      await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(creditsToAdd)
-      });
+            const creditsToAdd = payData.creditsAmount;
+      await addMonthlyCredits(payData.uid, creditsToAdd);
       await db.collection("users").doc(user.uid).collection("transactions").add({
         type:"credit", amount:creditsToAdd,
         note:`Card top-up — $${payData.amountUSD} — ${creditsToAdd.toLocaleString()} credits`,
