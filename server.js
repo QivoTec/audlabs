@@ -4707,6 +4707,41 @@ app.get("/api/admin/tickets-list", async (req,res) => {
     return res.status(500).json({ error:e.message });
   }
 });
+// ── ADMIN: MIGRATE LEGACY CREDITS TO MONTHLY (WITH FIXED EXPIRY) ──
+app.post("/api/admin/migrate-legacy-credits", async (req,res) => {
+  const isAdmin = req.headers["x-admin-secret"] === "audlabs-admin-2026";
+  if(!isAdmin) return res.status(401).json({ error:"Unauthorized" });
+  try {
+    const { uids, expiryDateISO } = req.body;
+    if(!uids || !Array.isArray(uids) || !uids.length) return res.status(400).json({ error:"uids array is required" });
+    if(!expiryDateISO) return res.status(400).json({ error:"expiryDateISO is required" });
+    const expiryTimestamp = admin.firestore.Timestamp.fromDate(new Date(expiryDateISO));
+    let migratedCount = 0;
+    let failedUids = [];
+    for(const uid of uids){
+      try {
+        const userRef = db.collection("users").doc(uid);
+        const userDoc = await userRef.get();
+        if(!userDoc.exists) continue;
+        const legacyAmount = userDoc.data().credits || 0;
+        if(legacyAmount <= 0) continue;
+        await userRef.update({
+          credits: 0,
+          monthlyCredits: admin.firestore.FieldValue.increment(legacyAmount),
+          monthlyCreditsExpiresAt: expiryTimestamp
+        });
+        migratedCount++;
+      } catch(migrateErr){
+        console.warn("Migration failed for uid:", uid, migrateErr.message);
+        failedUids.push(uid);
+      }
+    }
+    return res.json({ success:true, migratedCount: migratedCount, failedCount: failedUids.length, failed: failedUids });
+  } catch(e){
+    console.error("Migrate legacy credits error:", e.message);
+    return res.status(500).json({ error:e.message });
+  }
+});
 // ── ADMIN: SEND CREDIT EXPIRY NOTICE ──
 app.post("/api/admin/send-credit-expiry-notice", async (req,res) => {
   const isAdmin = req.headers["x-admin-secret"] === "audlabs-admin-2026";
