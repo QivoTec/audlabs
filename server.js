@@ -1180,8 +1180,12 @@ app.post("/api/translate-script", async (req,res) => {
         if(team.credits === -1 || team.credits > 0) isTeamMember = true;
       }
     }
-    if(!isTeamMember){
-      const individualCredits = userDoc.data()?.credits || 0;
+        if(!isTeamMember){
+      const legacyCreditsTr = userDoc.data()?.credits || 0;
+      let monthlyCreditsTr = userDoc.data()?.monthlyCredits || 0;
+      const monthlyExpiresAtTr = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
+      if(monthlyExpiresAtTr && monthlyExpiresAtTr < new Date()) monthlyCreditsTr = 0;
+      const individualCredits = legacyCreditsTr + monthlyCreditsTr;
       if(!user.email_verified){
         return res.status(403).json({ error:"Please verify your email address before using this feature." });
       }
@@ -1213,17 +1217,14 @@ app.post("/api/translate-script", async (req,res) => {
         note:`Translation to ${targetLang} (Team)`,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-    } else {
-      const current = userDoc.data()?.credits || 0;
-      await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(-cost)
-      });
+        } else {
+      const deductResultTr = await deductUserCredits(user.uid, cost);
       await db.collection("users").doc(user.uid).collection("transactions").add({
         type:"debit", amount:-cost,
         note:`Translation to ${targetLang}`,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-      remaining = current - cost;
+      remaining = deductResultTr.remaining;
     }
 
     return res.json({ success:true, translatedText, remaining });
@@ -1970,9 +1971,13 @@ app.post("/api/clone-voice", async (req,res) => {
         const originalName = file.originalFilename || file.name || "audio.mp3";
         const mimeType = file.mimetype || "audio/wav";
 
-        // Check credits
+                // Check credits
         const userDoc = await db.collection("users").doc(user.uid).get();
-        const currentCredits = userDoc.data()?.credits || 0;
+        const legacyCreditsClone = userDoc.data()?.credits || 0;
+        let monthlyCreditsClone = userDoc.data()?.monthlyCredits || 0;
+        const monthlyExpiresAtClone = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
+        if(monthlyExpiresAtClone && monthlyExpiresAtClone < new Date()) monthlyCreditsClone = 0;
+        const currentCredits = legacyCreditsClone + monthlyCreditsClone;
         const teamId = userDoc.data()?.teamId;
         let hasTeamCredits = false;
         if(teamId){
