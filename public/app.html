@@ -4798,8 +4798,7 @@ window.downloadAllSvSearchResults = async function(){
         var response = await fetch(window.currentSvSearchResults[myIndex].downloadUrl);
         var blob = await response.blob();
         zip.file("clip_"+(myIndex+1)+".mp4", blob);
-        completed++;
-        showStatus("Preparing zip file — "+completed+" of "+total+" clips fetched...", "");
+                completed++;
       }
     }
     var workers = [];
@@ -4935,8 +4934,7 @@ window.downloadAllClips = async function(){
         var response = await fetch(window.currentSvAllClips[myIndex]);
         var blob = await response.blob();
         zip.file("clip_"+(myIndex+1)+".mp4", blob);
-        completed++;
-        showStatus("Preparing zip file — "+completed+" of "+total+" clips fetched...", "");
+                completed++;
       }
     }
     var clipWorkers = [];
