@@ -961,7 +961,15 @@ var voiceGenderFilter = "all";var voiceLangFilter = "en";
 var favoriteVoices = JSON.parse(localStorage.getItem("vg-fav-voices")||"[]");
 var user=null,selVoice=VOICES[0].id,cloned=[],history=[],lastBlob=null,stTimer;
 function $(id){return document.getElementById(id);}
-function showStatus(msg,type){var b=$("vg-status");b.textContent=msg;b.className="vg-status show "+(type||"");clearTimeout(stTimer);stTimer=setTimeout(function(){b.classList.remove("show");},3500);}
+function showStatus(msg,type){
+  var b=$("vg-status");
+  b.textContent=msg;
+  b.classList.remove("ok","err");
+  if(type) b.classList.add(type);
+  b.classList.add("show");
+  clearTimeout(stTimer);
+  stTimer=setTimeout(function(){b.classList.remove("show");},3500);
+}
 document.getElementById("vg-land").style.display="none";
 document.getElementById("vg-app").style.display="none";
 auth.onAuthStateChanged(function(u){
