@@ -4776,18 +4776,26 @@ window.downloadAllSvSearchResults = async function(){
     showStatus("Failed to process download: " + deductErr.message, "err");
     return;
   }
-  var total = window.currentSvSearchResults.length;
-  showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
+   var total = window.currentSvSearchResults.length;
+  var progressEl = document.getElementById("vg-zip-progress");
+  if(!progressEl){
+    progressEl = document.createElement("div");
+    progressEl.id = "vg-zip-progress";
+    progressEl.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border-radius:10px;padding:12px 24px;font-size:13px;color:#fff;font-weight:500;z-index:9999;white-space:nowrap;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
+    document.body.appendChild(progressEl);
+  }
+  progressEl.textContent = "Preparing zip file — 0 of "+total+" clips fetched...";
   try {
     var zip = new JSZip();
     for(var i = 0; i < total; i++){
       var response = await fetch(window.currentSvSearchResults[i].downloadUrl);
       var blob = await response.blob();
       zip.file("clip_"+(i+1)+".mp4", blob);
-      showStatus("Preparing zip file — "+(i+1)+" of "+total+" clips fetched...", "");
+      progressEl.textContent = "Preparing zip file — "+(i+1)+" of "+total+" clips fetched...";
     }
-    showStatus("Compressing zip file...", "");
-    var zipBlob = await zip.generateAsync({type:"blob"});
+    progressEl.textContent = "Compressing zip file...";
+    var zipBlob = await zip.generateAsync({type:"blob", compression:"STORE"});
+        progressEl.remove();
     var a = document.createElement("a");
     a.href = URL.createObjectURL(zipBlob);
     a.download = "audlabs_clips_"+Date.now()+".zip";
@@ -4797,6 +4805,7 @@ window.downloadAllSvSearchResults = async function(){
     URL.revokeObjectURL(a.href);
         showStatus("All "+total+" clips downloaded as a zip file! "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
   } catch(e){
+    if(progressEl) progressEl.remove();
     showStatus("Zip download failed: " + e.message, "err");
   }
 };
@@ -4900,18 +4909,26 @@ window.downloadAllClips = async function(){
     showStatus("Failed to process download: " + deductErr.message, "err");
     return;
   }
-  var total = window.currentSvAllClips.length;
-  showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
+    var total = window.currentSvAllClips.length;
+  var progressEl2 = document.getElementById("vg-zip-progress");
+  if(!progressEl2){
+    progressEl2 = document.createElement("div");
+    progressEl2.id = "vg-zip-progress";
+    progressEl2.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border-radius:10px;padding:12px 24px;font-size:13px;color:#fff;font-weight:500;z-index:9999;white-space:nowrap;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.3);";
+    document.body.appendChild(progressEl2);
+  }
+  progressEl2.textContent = "Preparing zip file — 0 of "+total+" clips fetched...";
   try {
     var zip = new JSZip();
     for(var i = 0; i < total; i++){
       var response = await fetch(window.currentSvAllClips[i]);
       var blob = await response.blob();
       zip.file("clip_"+(i+1)+".mp4", blob);
-      showStatus("Preparing zip file — "+(i+1)+" of "+total+" clips fetched...", "");
+      progressEl2.textContent = "Preparing zip file — "+(i+1)+" of "+total+" clips fetched...";
     }
-    showStatus("Compressing zip file...", "");
-    var zipBlob = await zip.generateAsync({type:"blob"});
+    progressEl2.textContent = "Compressing zip file...";
+    var zipBlob = await zip.generateAsync({type:"blob", compression:"STORE"});
+    progressEl2.remove();
     var a = document.createElement("a");
     a.href = URL.createObjectURL(zipBlob);
     a.download = "audlabs_clips_"+Date.now()+".zip";
@@ -4921,6 +4938,7 @@ window.downloadAllClips = async function(){
     URL.revokeObjectURL(a.href);
         showStatus("All "+total+" clips downloaded as a zip file! "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
   } catch(e){
+    if(progressEl2) progressEl2.remove();
     showStatus("Zip download failed: " + e.message, "err");
   }
 };
