@@ -4776,16 +4776,29 @@ window.downloadAllSvSearchResults = async function(){
     showStatus("Failed to process download: " + deductErr.message, "err");
     return;
   }
-  var total = window.currentSvSearchResults.length;
+    var total = window.currentSvSearchResults.length;
   showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
   try {
     var zip = new JSZip();
-    for(var i = 0; i < total; i++){
-      var response = await fetch(window.currentSvSearchResults[i].downloadUrl);
-      var blob = await response.blob();
-      zip.file("clip_"+(i+1)+".mp4", blob);
-      showStatus("Preparing zip file — "+(i+1)+" of "+total+" clips fetched...", "");
+    var completed = 0;
+    var CONCURRENCY = 4;
+    var nextIndex = 0;
+    async function fetchNext(){
+      while(nextIndex < total){
+        var myIndex = nextIndex;
+        nextIndex++;
+        var response = await fetch(window.currentSvSearchResults[myIndex].downloadUrl);
+        var blob = await response.blob();
+        zip.file("clip_"+(myIndex+1)+".mp4", blob);
+        completed++;
+        showStatus("Preparing zip file — "+completed+" of "+total+" clips fetched...", "");
+      }
     }
+    var workers = [];
+    for(var w = 0; w < Math.min(CONCURRENCY, total); w++){
+      workers.push(fetchNext());
+    }
+    await Promise.all(workers);
     showStatus("Compressing zip file...", "");
     var zipBlob = await zip.generateAsync({type:"blob"});
     var a = document.createElement("a");
@@ -4900,16 +4913,29 @@ window.downloadAllClips = async function(){
     showStatus("Failed to process download: " + deductErr.message, "err");
     return;
   }
-  var total = window.currentSvAllClips.length;
+    var total = window.currentSvAllClips.length;
   showStatus("Preparing zip file — 0 of "+total+" clips fetched...", "");
   try {
     var zip = new JSZip();
-    for(var i = 0; i < total; i++){
-      var response = await fetch(window.currentSvAllClips[i]);
-      var blob = await response.blob();
-      zip.file("clip_"+(i+1)+".mp4", blob);
-      showStatus("Preparing zip file — "+(i+1)+" of "+total+" clips fetched...", "");
+    var completed = 0;
+    var CONCURRENCY = 4;
+    var nextIndex = 0;
+    async function fetchNextClip(){
+      while(nextIndex < total){
+        var myIndex = nextIndex;
+        nextIndex++;
+        var response = await fetch(window.currentSvAllClips[myIndex]);
+        var blob = await response.blob();
+        zip.file("clip_"+(myIndex+1)+".mp4", blob);
+        completed++;
+        showStatus("Preparing zip file — "+completed+" of "+total+" clips fetched...", "");
+      }
     }
+    var clipWorkers = [];
+    for(var w = 0; w < Math.min(CONCURRENCY, total); w++){
+      clipWorkers.push(fetchNextClip());
+    }
+    await Promise.all(clipWorkers);
     showStatus("Compressing zip file...", "");
     var zipBlob = await zip.generateAsync({type:"blob"});
     var a = document.createElement("a");
