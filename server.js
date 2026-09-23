@@ -5891,6 +5891,8 @@ return res.json({ success:true, user:{
   email: d.email||"",
   displayName: d.displayName||d.name||"",
   credits: d.credits||0,
+  monthlyCredits: d.monthlyCredits||0,
+  monthlyCreditsExpiresAt: d.monthlyCreditsExpiresAt ? d.monthlyCreditsExpiresAt.toMillis() : null,
   totalGenerations: d.totalGenerations||0,
   totalCharacters: d.totalCharacters||0,
   teamId: d.teamId||"",
@@ -5984,11 +5986,13 @@ app.get("/api/admin-stats", async (req,res) => {
           voiceCount[v] = (voiceCount[v]||0) + d.voiceCount[v];
         });
       }
-      recentUsers.push({
+            recentUsers.push({
         id: doc.id,
         email: d.email||"",
         displayName: d.displayName||"",
         credits: d.credits||0,
+        monthlyCredits: d.monthlyCredits||0,
+        monthlyCreditsExpiresAt: d.monthlyCreditsExpiresAt ? d.monthlyCreditsExpiresAt.toMillis() : null,
         totalGenerations: d.totalGenerations||0,
         totalCharacters: d.totalCharacters||0,
         teamId: d.teamId||"",
