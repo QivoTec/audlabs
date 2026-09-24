@@ -2010,17 +2010,17 @@ app.post("/api/clone-voice", async (req,res) => {
         console.log("Audio saved to Firebase Storage:", storageFilename);
 
         // MiniMax accounts for cloning
-                const minimaxAccounts = [
+                        const minimaxAccounts = [
           { key: process.env.MINIMAX_SUBSCRIPTION_KEY_1 || process.env.MINIMAX_API_KEY, name: "acc1" },
-          { key: process.env.MINIMAX_API_KEY_2, name: "acc2" },
-          { key: process.env.MINIMAX_API_KEY_3, name: "acc3" },
-          { key: process.env.MINIMAX_API_KEY_4, name: "acc4" },
-          { key: process.env.MINIMAX_API_KEY_5, name: "acc5" },
-          { key: process.env.MINIMAX_API_KEY_6, name: "acc6" },
-          { key: process.env.MINIMAX_API_KEY_7, name: "acc7" },
-          { key: process.env.MINIMAX_API_KEY_8, name: "acc8" },
-          { key: process.env.MINIMAX_API_KEY_9, name: "acc9" },
-          { key: process.env.MINIMAX_API_KEY_10, name: "acc10" }
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_2 || process.env.MINIMAX_API_KEY_2, name: "acc2" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_3 || process.env.MINIMAX_API_KEY_3, name: "acc3" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_4 || process.env.MINIMAX_API_KEY_4, name: "acc4" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_5 || process.env.MINIMAX_API_KEY_5, name: "acc5" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_6 || process.env.MINIMAX_API_KEY_6, name: "acc6" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_7 || process.env.MINIMAX_API_KEY_7, name: "acc7" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_8 || process.env.MINIMAX_API_KEY_8, name: "acc8" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_9 || process.env.MINIMAX_API_KEY_9, name: "acc9" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_10 || process.env.MINIMAX_API_KEY_10, name: "acc10" }
         ];
 
 
