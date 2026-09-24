@@ -2010,8 +2010,8 @@ app.post("/api/clone-voice", async (req,res) => {
         console.log("Audio saved to Firebase Storage:", storageFilename);
 
         // MiniMax accounts for cloning
-        const minimaxAccounts = [
-          { key: process.env.MINIMAX_API_KEY, name: "acc1" },
+                const minimaxAccounts = [
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_1 || process.env.MINIMAX_API_KEY, name: "acc1" },
           { key: process.env.MINIMAX_API_KEY_2, name: "acc2" },
           { key: process.env.MINIMAX_API_KEY_3, name: "acc3" },
           { key: process.env.MINIMAX_API_KEY_4, name: "acc4" },
