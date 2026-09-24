@@ -2069,9 +2069,9 @@ app.post("/api/clone-voice", async (req,res) => {
             console.log("File uploaded to MiniMax:", acc.name, "file_id:", fileId);
 
             // Step 2: Clone voice
-            const cloneRes = await axios.post(
+                        const cloneRes = await axios.post(
               "https://api.minimax.io/v1/voice_clone",
-              { file_id: fileId, voice_id: minimaxVoiceId, noise_reduction: fields.noiseReduction?.[0] === "true" || fields.noiseReduction === "true" },
+              { file_id: fileId, voice_id: minimaxVoiceId, noise_reduction: fields.noiseReduction?.[0] === "true" || fields.noiseReduction === "true", model: "speech-2.8-hd", text: "Hello, this is a preview of your cloned voice on AudLabs." },
               { headers: { Authorization: `Bearer ${acc.key}`, "Content-Type": "application/json" }, timeout: 30000 }
             );
             if(cloneRes.data?.base_resp?.status_code === 0){
