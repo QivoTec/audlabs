@@ -3304,6 +3304,13 @@ app.get("/seyi", (req,res) => {
 app.get("/mobile", (req,res) => {
   res.sendFile(path.join(__dirname, "public", "mobile.html"));
 });
+app.get("/get-app", (req,res) => {
+  const ua = req.headers["user-agent"] || "";
+  if(/iphone|ipad|ipod/i.test(ua)){
+    return res.redirect("https://audlabs.io/mobile?ios=soon");
+  }
+  return res.redirect("https://play.google.com/store/apps/details?id=io.audlabs.app");
+});
 // ── SITEMAP ──
 app.get("/sitemap.xml", async (req,res) => {
   try {
