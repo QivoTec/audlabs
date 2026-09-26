@@ -7,7 +7,7 @@
 <meta name="description" content="Generate AI voiceovers, clone your voice, and create content faster — right from your phone. Download the AudLabs app for Android. iOS coming soon.">
 <link rel="icon" href="/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:#030E2E;color:#fff;overflow-x:hidden;}
@@ -36,7 +36,8 @@ footer p{font-size:12px;color:rgba(255,255,255,0.3);}
 footer a{color:rgba(201,168,76,0.7);text-decoration:none;}
 
 .qr-float{position:fixed;bottom:24px;right:24px;background:#fff;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,0.35);z-index:200;max-width:280px;}
-#qr-canvas{width:76px;height:76px;flex-shrink:0;border-radius:8px;overflow:hidden;}
+#qr-canvas{flex-shrink:0;line-height:0;}
+#qr-canvas svg,#qr-canvas canvas,#qr-canvas img{display:block;width:84px !important;height:84px !important;}
 .qr-float-text{color:#111;}
 .qr-float-title{font-size:13px;font-weight:700;margin-bottom:2px;}
 .qr-float-sub{font-size:11px;color:#666;line-height:1.4;}
@@ -106,20 +107,27 @@ if(new URLSearchParams(window.location.search).get("ios") === "soon"){
   setTimeout(function(){ document.getElementById("ios-soon-banner").style.display = "none"; }, 8000);
 }
 
-const qrCode = new QRCodeStyling({
-  width: 200,
-  height: 200,
-  type: "svg",
-  data: "https://audlabs.io/get-app",
-  image: "https://audlabs.io/logo.png",
-  dotsOptions: { color: "#030E2E", type: "rounded" },
-  cornersSquareOptions: { color: "#c9a84c", type: "extra-rounded" },
-  cornersDotOptions: { color: "#c9a84c" },
-  backgroundOptions: { color: "#ffffff" },
-  imageOptions: { crossOrigin: "anonymous", margin: 8, imageSize: 0.35 },
-  qrOptions: { errorCorrectionLevel: "H" }
+window.addEventListener("load", function(){
+  try {
+    const qrCode = new QRCodeStyling({
+      width: 300,
+      height: 300,
+      type: "canvas",
+      data: "https://audlabs.io/get-app",
+      image: "https://audlabs.io/logo.png",
+      dotsOptions: { color: "#030E2E", type: "rounded" },
+      cornersSquareOptions: { color: "#c9a84c", type: "extra-rounded" },
+      cornersDotOptions: { color: "#c9a84c" },
+      backgroundOptions: { color: "#ffffff" },
+      imageOptions: { crossOrigin: "anonymous", margin: 10, imageSize: 0.3, hideBackgroundDots: true },
+      qrOptions: { errorCorrectionLevel: "H" }
+    });
+    qrCode.append(document.getElementById("qr-canvas"));
+  } catch(e){
+    console.warn("QR render failed:", e);
+    document.getElementById("qr-canvas").innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://audlabs.io/get-app" style="width:84px;height:84px;border-radius:8px;">';
+  }
 });
-qrCode.append(document.getElementById("qr-canvas"));
 </script>
 
 </body>
