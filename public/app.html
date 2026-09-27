@@ -1259,9 +1259,9 @@ $("vg-signout").onclick=function(){
   var group = document.getElementById("sb-group-"+section);
   var arrow = document.getElementById("sb-arrow-"+section);
   if(!group) return;
-  var isOpen = group.style.display === "block";
-  group.style.display = isOpen ? "none" : "block";
-  if(arrow) arrow.style.transform = isOpen ? "rotate(0deg)" : "rotate(-90deg)";
+  var willOpen = group.style.display !== "block";
+  group.style.display = willOpen ? "block" : "none";
+  if(arrow) arrow.style.transform = willOpen ? "rotate(0deg)" : "rotate(-90deg)";
 };
 document.addEventListener("DOMContentLoaded", function(){
   var toolsArrow = document.getElementById("sb-arrow-tools");
