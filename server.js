@@ -963,7 +963,8 @@ app.get("/api/balance", async (req,res) => {
             teamId: d.teamId||"",
       hasPurchased: d.hasPurchased||false,
       referralRate: d.referralRate||10,
-      hasSeenDownloadWarning: d.hasSeenDownloadWarning||false,
+            hasSeenDownloadWarning: d.hasSeenDownloadWarning||false,
+      hasSeenWelcome: d.hasSeenWelcome||false,
     });
 
   } catch(e) { return res.status(500).json({ error:e.message }); }
@@ -1076,6 +1077,19 @@ app.post("/api/mark-download-warning-seen", async (req,res) => {
   try {
     await db.collection("users").doc(user.uid).set({
       hasSeenDownloadWarning: true
+    }, { merge: true });
+    return res.json({ success:true });
+  } catch(e){
+    return res.status(500).json({ error:e.message });
+  }
+});
+// ── MARK WELCOME SEEN ──
+app.post("/api/mark-welcome-seen", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if(!user) return;
+  try {
+    await db.collection("users").doc(user.uid).set({
+      hasSeenWelcome: true
     }, { merge: true });
     return res.json({ success:true });
   } catch(e){
