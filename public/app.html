@@ -110,7 +110,7 @@ Continue with Google
 <a href="#" onclick="cancelOtpScreen();return false;" style="display:block;font-size:13px;color:#bbb;text-decoration:none;margin-top:16px;">← Back to Sign In</a>
 </div>
 </div>
-<!-- ══ APP ══ --><div id="vg-app"><div class="vg-overlay" id="vg-overlay"></div><!-- SIDEBAR --><aside class="vg-sidebar" id="vg-sidebar"><div class="vg-sb-logo" style="display:flex;align-items:center;gap:10px;"><img src="/logo.png" style="width:36px;height:36px;object-fit:contain;flex-shrink:0;"><div><div class="vg-sb-logotext">AudLabs</div><div class="vg-sb-sub">AI Studio</div></div><a href="https://audlabs.io/status" target="_blank" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.2);border-radius:100px;padding:2px 8px;margin-top:4px;" title="See AudLabs Status"><span id="sidebar-status-dot" style="width:6px;height:6px;background:#27ae60;border-radius:50%;display:inline-block;animation:pulse 2s infinite;"></span><span style="font-size:9px;font-weight:600;color:#27ae60;">See AudLabs Status</span></a></div><nav class="vg-sb-nav"><div style="font-size:11px;font-weight:600;color:#666;letter-spacing:0.15em;margin-top:16px;margin-bottom:10px;padding:0 10px;">VIDEO TOOLS</div>
+<!-- ══ APP ══ --><div id="vg-app"><div class="vg-overlay" id="vg-overlay"></div><!-- SIDEBAR --><aside class="vg-sidebar" id="vg-sidebar"><div class="vg-sb-logo" style="display:flex;align-items:center;gap:10px;"><img src="/logo.png" style="width:36px;height:36px;object-fit:contain;flex-shrink:0;"><div><div class="vg-sb-logotext">AudLabs</div><div class="vg-sb-sub">AI Studio</div></div><a href="https://audlabs.io/status" target="_blank" id="sidebar-status-btn" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;background:linear-gradient(180deg,#4ecb7a 0%,#27ae60 45%,#1f8c4d 100%);border:1px solid rgba(39,174,96,0.5);color:#111;padding:5px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;margin-top:6px;position:relative;overflow:hidden;box-shadow:0 3px 10px rgba(39,174,96,0.35),0 0 0 3px rgba(39,174,96,0.12),inset 0 1px 0 rgba(255,255,255,0.4);"><span id="sidebar-status-dot" style="width:6px;height:6px;background:#fff;border-radius:50%;display:inline-block;animation:pulse 2s infinite;"></span><span id="sidebar-status-text" style="color:#111;">Status</span></a></div><nav class="vg-sb-nav"><div style="font-size:11px;font-weight:600;color:#666;letter-spacing:0.15em;margin-top:16px;margin-bottom:10px;padding:0 10px;">VIDEO TOOLS</div>
 <div id="sb-group-tools" style="display:block;">
 <button class="vg-sb-item active" data-tab="generate"><svg class="icon" viewBox="0 0 18 18" fill="none"><path d="M3 5h12M3 9h8M3 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Text to Speech.</button>
 <button class="vg-sb-item" data-tab="clone"><svg class="icon" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M9 6v6M6 9h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Clone Voices.</button>
@@ -3172,13 +3172,26 @@ async function checkMinimaxStatus(){
     var res = await fetch(BACKEND+"/api/minimax-status", {headers:{"Authorization":"Bearer "+token}});
     var data = await res.json();
     var existingBanner = document.getElementById("minimax-status-banner");
+    var btn = document.getElementById("sidebar-status-btn");
+    var dot = document.getElementById("sidebar-status-dot");
+    var txt = document.getElementById("sidebar-status-text");
     if(data.exhausted){
-var dot = document.getElementById("sidebar-status-dot");
-      if(dot) dot.style.background = "#e74c3c";
+      if(btn){
+        btn.style.background = "linear-gradient(180deg,#f08080 0%,#e74c3c 45%,#c0392b 100%)";
+        btn.style.borderColor = "rgba(231,76,60,0.5)";
+        btn.style.boxShadow = "0 3px 10px rgba(231,76,60,0.35),0 0 0 3px rgba(231,76,60,0.12),inset 0 1px 0 rgba(255,255,255,0.4)";
+      }
+      if(dot) dot.style.background = "#fff";
+      if(txt) txt.textContent = "Outage";
     } else {
       if(existingBanner) existingBanner.remove();
-      var dot2 = document.getElementById("sidebar-status-dot");
-      if(dot2) dot2.style.background = "#27ae60";
+      if(btn){
+        btn.style.background = "linear-gradient(180deg,#4ecb7a 0%,#27ae60 45%,#1f8c4d 100%)";
+        btn.style.borderColor = "rgba(39,174,96,0.5)";
+        btn.style.boxShadow = "0 3px 10px rgba(39,174,96,0.35),0 0 0 3px rgba(39,174,96,0.12),inset 0 1px 0 rgba(255,255,255,0.4)";
+      }
+      if(dot) dot.style.background = "#fff";
+      if(txt) txt.textContent = "Status";
     }
 
   } catch(e){ console.warn("Status check failed:", e); }
