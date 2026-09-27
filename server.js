@@ -224,6 +224,37 @@ async function uploadAudioToStorage(audioBuffer, uid, mimeType){
     return null;
   }
 }
+async function addMonthlyCredits(uid, amount) {
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + 30);
+  await db.collection("users").doc(uid).update({
+    monthlyCredits: admin.firestore.FieldValue.increment(amount),
+    monthlyCreditsExpiresAt: admin.firestore.Timestamp.fromDate(expiryDate),
+    hasPurchased: true
+  });
+}
+async function deductUserCredits(uid, cost) {
+  const ref = db.collection("users").doc(uid);
+  const doc = await ref.get();
+  const data = doc.exists ? doc.data() : {};
+  let monthlyCredits = data.monthlyCredits || 0;
+  let legacyCredits = data.credits || 0;
+  const expiresAt = data.monthlyCreditsExpiresAt ? data.monthlyCreditsExpiresAt.toDate() : null;
+  const isExpired = expiresAt && expiresAt < new Date();
+  if(isExpired){ monthlyCredits = 0; }
+  const totalAvailable = monthlyCredits + legacyCredits;
+  if(totalAvailable < cost){
+    return { success: false, available: totalAvailable };
+  }
+  const fromMonthly = Math.min(monthlyCredits, cost);
+  const fromLegacy = cost - fromMonthly;
+  const updates = {
+    monthlyCredits: monthlyCredits - fromMonthly,
+    credits: legacyCredits - fromLegacy
+  };
+  await ref.update(updates);
+  return { success: true, remaining: (monthlyCredits - fromMonthly) + (legacyCredits - fromLegacy) };
+}
 async function verifyUser(req, res) {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer ")) { res.status(401).json({ error:"Unauthorized" }); return null; }
@@ -942,6 +973,156 @@ app.get("/api/minimax-status", async (req,res) => {
 });
 
 
+// ── VIDEO STATS ──
+app.post("/api/video-stats", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const { videoUrl } = req.body;
+    if(!videoUrl) return res.status(400).json({ error:"videoUrl is required" });
+    const idMatch = videoUrl.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if(!idMatch) return res.status(400).json({ error:"Invalid YouTube URL. Please paste a valid video link." });
+    const videoId = idMatch[1];
+    const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+    const videoRes = await axios.get("https://www.googleapis.com/youtube/v3/videos", {
+      params: { part: "snippet,statistics,contentDetails", id: videoId, key: YOUTUBE_API_KEY }
+    });
+    if(!videoRes.data.items || !videoRes.data.items.length){
+      return res.status(404).json({ error:"Video not found. It may be private, deleted, or the link is incorrect." });
+    }
+    const video = videoRes.data.items[0];
+    const channelId = video.snippet.channelId;
+    const channelRes = await axios.get("https://www.googleapis.com/youtube/v3/channels", {
+      params: { part: "snippet,statistics", id: channelId, key: YOUTUBE_API_KEY }
+    });
+    const channel = channelRes.data.items[0];
+    return res.json({
+      success: true,
+      video: {
+        title: video.snippet.title,
+        description: video.snippet.description,
+        publishedAt: video.snippet.publishedAt,
+        tags: video.snippet.tags || [],
+        viewCount: video.statistics.viewCount || "0",
+        likeCount: video.statistics.likeCount || "0",
+        commentCount: video.statistics.commentCount || "0",
+        duration: video.contentDetails.duration,
+        thumbnail: video.snippet.thumbnails?.high?.url || video.snippet.thumbnails?.default?.url
+      },
+      channel: {
+        title: channel.snippet.title,
+        description: channel.snippet.description,
+        publishedAt: channel.snippet.publishedAt,
+        subscriberCount: channel.statistics.subscriberCount || "Hidden",
+        videoCount: channel.statistics.videoCount || "0",
+        viewCount: channel.statistics.viewCount || "0",
+        thumbnail: channel.snippet.thumbnails?.high?.url || channel.snippet.thumbnails?.default?.url
+      }
+    });
+  } catch(e){
+        console.error("Video stats error:", e.response?.data || e.message);
+    return res.status(500).json({ error:"Failed to fetch video stats. Please try again." });
+  }
+});
+// ── MUSIC FINDER ──
+app.post("/api/music-finder", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const { query, minDuration, maxDuration } = req.body;
+    if(!query) return res.status(400).json({ error:"query is required" });
+    const FREESOUND_API_KEY = process.env.FREESOUND_API_KEY;
+    const minDur = minDuration || 0;
+    const maxDur = maxDuration || 600;
+    const searchQuery = query.toLowerCase().includes("music") ? query : query + " music";
+    const filterStr = `duration:[${minDur} TO ${maxDur}] license:"Creative Commons 0"`;
+    const searchRes = await axios.get("https://freesound.org/apiv2/search/text/", {
+      params: {
+        query: searchQuery,
+        filter: filterStr,
+        fields: "id,name,duration,previews,tags,username,license,download",
+        page_size: 20,
+        token: FREESOUND_API_KEY
+      }
+    });
+    const results = (searchRes.data.results || []).map(function(track){
+      return {
+        id: track.id,
+        name: track.name,
+        duration: Math.round(track.duration),
+        previewUrl: track.previews["preview-hq-mp3"] || track.previews["preview-lq-mp3"],
+        tags: track.tags || [],
+        username: track.username,
+        license: "CC0 (Free to use)"
+      };
+    });
+    return res.json({ success: true, results: results, count: searchRes.data.count });
+  } catch(e){
+    console.error("Music finder error:", e.response?.data || e.message);
+    return res.status(500).json({ error:"Failed to search for music. Please try again." });
+  }
+});
+// ── DEDUCT CREDITS FOR VIDEO CLIP DOWNLOAD ──
+app.post("/api/deduct-clip-credits", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const { type } = req.body;
+    const CLIP_COST = type === "all" ? 10000 : 2000;
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const teamId = userDoc.data()?.teamId;
+    let isTeamMember = false;
+    if(teamId){
+      const teamDoc = await db.collection("teams").doc(teamId).get();
+      if(teamDoc.exists){
+        const team = teamDoc.data();
+        if(team.credits === -1 || team.credits > 0) isTeamMember = true;
+      }
+    }
+        let remaining = 999999999;
+    if(!isTeamMember){
+      const deductResult = await deductUserCredits(user.uid, CLIP_COST);
+      if(!deductResult.success){
+        return res.status(402).json({ error: "Insufficient credits. You need "+CLIP_COST.toLocaleString()+" credits for this download." });
+      }
+      remaining = deductResult.remaining;
+    }
+    return res.json({ success: true, remaining: remaining, cost: CLIP_COST });
+  } catch(e){
+    console.error("Clip download deduct error:", e.message);
+    return res.status(500).json({ error: "Failed to process download. Please try again." });
+  }
+});
+// ── DEDUCT CREDITS FOR MUSIC DOWNLOAD ──
+app.post("/api/deduct-music-credits", async (req,res) => {
+  const user = await verifyUser(req,res);
+  if (!user) return;
+  try {
+    const MUSIC_DOWNLOAD_COST = 3000;
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const teamId = userDoc.data()?.teamId;
+    let isTeamMember = false;
+    if(teamId){
+      const teamDoc = await db.collection("teams").doc(teamId).get();
+      if(teamDoc.exists){
+        const team = teamDoc.data();
+        if(team.credits === -1 || team.credits > 0) isTeamMember = true;
+      }
+    }
+    let remaining = 999999999;
+    if(!isTeamMember){
+      const deductResult = await deductUserCredits(user.uid, MUSIC_DOWNLOAD_COST);
+      if(!deductResult.success){
+        return res.status(402).json({ error: "Insufficient credits. You need "+MUSIC_DOWNLOAD_COST.toLocaleString()+" credits to download a track." });
+      }
+      remaining = deductResult.remaining;
+    }
+    return res.json({ success: true, remaining: remaining });
+  } catch(e){
+    console.error("Music download deduct error:", e.message);
+    return res.status(500).json({ error: "Failed to process download. Please try again." });
+  }
+});
 // ── BALANCE ──
 app.get("/api/balance", async (req,res) => {
   const user = await verifyUser(req,res);
@@ -949,9 +1130,17 @@ app.get("/api/balance", async (req,res) => {
   try {
     const doc = await db.collection("users").doc(user.uid).get();
     if (!doc.exists) return res.json({ credits:0, virtualAccount:null });
-    const d = doc.data();
+        const d = doc.data();
+    let monthlyCredits = d.monthlyCredits || 0;
+    const expiresAt = d.monthlyCreditsExpiresAt ? d.monthlyCreditsExpiresAt.toDate() : null;
+    const isMonthlyExpired = expiresAt && expiresAt < new Date();
+    if(isMonthlyExpired) monthlyCredits = 0;
+    const legacyCredits = d.credits || 0;
     return res.json({
-      credits: d.credits||0,
+      credits: monthlyCredits + legacyCredits,
+      monthlyCredits: monthlyCredits,
+      legacyCredits: legacyCredits,
+      monthlyCreditsExpiresAt: (expiresAt && !isMonthlyExpired) ? expiresAt.toISOString() : null,
       virtualAccount: d.virtualAccount||null,
       virtualAccounts: d.virtualAccount ? [d.virtualAccount] : [],
       referralCode: d.referralCode||"",
@@ -992,8 +1181,12 @@ app.post("/api/translate-script", async (req,res) => {
         if(team.credits === -1 || team.credits > 0) isTeamMember = true;
       }
     }
-    if(!isTeamMember){
-      const individualCredits = userDoc.data()?.credits || 0;
+        if(!isTeamMember){
+      const legacyCreditsTr = userDoc.data()?.credits || 0;
+      let monthlyCreditsTr = userDoc.data()?.monthlyCredits || 0;
+      const monthlyExpiresAtTr = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
+      if(monthlyExpiresAtTr && monthlyExpiresAtTr < new Date()) monthlyCreditsTr = 0;
+      const individualCredits = legacyCreditsTr + monthlyCreditsTr;
       if(!user.email_verified){
         return res.status(403).json({ error:"Please verify your email address before using this feature." });
       }
@@ -1025,17 +1218,14 @@ app.post("/api/translate-script", async (req,res) => {
         note:`Translation to ${targetLang} (Team)`,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-    } else {
-      const current = userDoc.data()?.credits || 0;
-      await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(-cost)
-      });
+        } else {
+      const deductResultTr = await deductUserCredits(user.uid, cost);
       await db.collection("users").doc(user.uid).collection("transactions").add({
         type:"debit", amount:-cost,
         note:`Translation to ${targetLang}`,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-      remaining = current - cost;
+      remaining = deductResultTr.remaining;
     }
 
     return res.json({ success:true, translatedText, remaining });
@@ -1144,11 +1334,10 @@ app.post("/api/deduct-credits", async (req,res) => {
         }
       }
     }
-    // Individual credits
-    const current = doc.exists?(doc.data().credits||0):0;
-    if (current<cost) return res.status(402).json({ error:"Insufficient credits", required:cost, available:current });
+        // Individual credits (monthly pool first, then legacy lifetime pool)
+    const deductResult = await deductUserCredits(user.uid, cost);
+    if(!deductResult.success) return res.status(402).json({ error:"Insufficient credits", required:cost, available:deductResult.available });
     await ref.update({ 
-  credits: admin.firestore.FieldValue.increment(-cost),
   totalCharacters: admin.firestore.FieldValue.increment(characters),
   totalGenerations: admin.firestore.FieldValue.increment(1),
   [`voiceCount.${voiceName}`]: admin.firestore.FieldValue.increment(1),
@@ -1158,7 +1347,7 @@ app.post("/api/deduct-credits", async (req,res) => {
       note:`Voiceover — ${voiceName||"Unknown"}`,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
-    return res.json({ success:true, creditsUsed:cost, remaining:current-cost });
+    return res.json({ success:true, creditsUsed:cost, remaining:deductResult.remaining });
   } catch(e) { return res.status(500).json({ error:e.message }); }
 });
 
@@ -1226,10 +1415,7 @@ app.post("/api/flutterwave-webhook", express.raw({ type:"*/*" }), async (req,res
     } catch(rateErr){
       creditsToAdd = Math.floor(amountPaid / 1600 * 100000);
     }
-    await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(creditsToAdd),
-        hasPurchased: true,
-      });
+        await addMonthlyCredits(uid, creditsToAdd);
     const today = new Date().toISOString().split("T")[0];
     const amountUSD = amountPaid / 1400;
     await db.collection("stats").doc("revenue").set({
@@ -1466,10 +1652,7 @@ app.post("/api/paystack-webhook", express.raw({ type:"*/*" }), async (req,res) =
       creditsToAdd = Math.floor(amountPaid / 1600 * 100000);
       console.log("Rate fetch failed, fallback credits:", creditsToAdd);
     }
-    await db.collection("users").doc(uid).update({
-      credits: admin.firestore.FieldValue.increment(creditsToAdd),
-      hasPurchased: true,
-    });
+        await addMonthlyCredits(uid, creditsToAdd);
 const today = new Date().toISOString().split("T")[0];
     const amountUSD = amountPaid / 1400;
     await db.collection("stats").doc("revenue").set({
@@ -1545,11 +1728,8 @@ app.post("/api/crypto-webhook", express.raw({ type:"*/*" }), async (req,res) => 
     const payData = payDoc.data();
     if (payData.status === "completed") return res.json({ received:true, duplicate:true });
 
-    const creditsToAdd = payData.creditsAmount;
-    await db.collection("users").doc(payData.uid).update({
-      credits: admin.firestore.FieldValue.increment(creditsToAdd),
-      hasPurchased: true,
-    });
+        const creditsToAdd = payData.creditsAmount;
+    await addMonthlyCredits(payData.uid, creditsToAdd);
 const today = new Date().toISOString().split("T")[0];
     await db.collection("stats").doc("revenue").set({
       totalUSD: admin.firestore.FieldValue.increment(payData.amountUSD || 0),
@@ -1724,11 +1904,9 @@ app.get("/api/check-crypto-payment", async (req,res) => {
       if (!paySnap.empty) {
         const payData = paySnap.docs[0].data();
         const orderId = paySnap.docs[0].id;
-        if (payData.status !== "completed") {
+                if (payData.status !== "completed") {
           const creditsToAdd = payData.creditsAmount;
-          await db.collection("users").doc(user.uid).update({
-            credits: admin.firestore.FieldValue.increment(creditsToAdd)
-          });
+          await addMonthlyCredits(user.uid, creditsToAdd);
           await db.collection("users").doc(user.uid).collection("transactions").add({
             type:"credit", amount:creditsToAdd,
             note:`Crypto top-up — $${payData.amountUSD} USDT — ${creditsToAdd.toLocaleString()} credits`,
@@ -1807,9 +1985,13 @@ app.post("/api/clone-voice", async (req,res) => {
         const originalName = file.originalFilename || file.name || "audio.mp3";
         const mimeType = file.mimetype || "audio/wav";
 
-        // Check credits
+                // Check credits
         const userDoc = await db.collection("users").doc(user.uid).get();
-        const currentCredits = userDoc.data()?.credits || 0;
+        const legacyCreditsClone = userDoc.data()?.credits || 0;
+        let monthlyCreditsClone = userDoc.data()?.monthlyCredits || 0;
+        const monthlyExpiresAtClone = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
+        if(monthlyExpiresAtClone && monthlyExpiresAtClone < new Date()) monthlyCreditsClone = 0;
+        const currentCredits = legacyCreditsClone + monthlyCreditsClone;
         const teamId = userDoc.data()?.teamId;
         let hasTeamCredits = false;
         if(teamId){
@@ -1842,17 +2024,17 @@ app.post("/api/clone-voice", async (req,res) => {
         console.log("Audio saved to Firebase Storage:", storageFilename);
 
         // MiniMax accounts for cloning
-        const minimaxAccounts = [
-          { key: process.env.MINIMAX_API_KEY, name: "acc1" },
-          { key: process.env.MINIMAX_API_KEY_2, name: "acc2" },
-          { key: process.env.MINIMAX_API_KEY_3, name: "acc3" },
-          { key: process.env.MINIMAX_API_KEY_4, name: "acc4" },
-          { key: process.env.MINIMAX_API_KEY_5, name: "acc5" },
-          { key: process.env.MINIMAX_API_KEY_6, name: "acc6" },
-          { key: process.env.MINIMAX_API_KEY_7, name: "acc7" },
-          { key: process.env.MINIMAX_API_KEY_8, name: "acc8" },
-          { key: process.env.MINIMAX_API_KEY_9, name: "acc9" },
-          { key: process.env.MINIMAX_API_KEY_10, name: "acc10" }
+                        const minimaxAccounts = [
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_1 || process.env.MINIMAX_API_KEY, name: "acc1" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_2 || process.env.MINIMAX_API_KEY_2, name: "acc2" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_3 || process.env.MINIMAX_API_KEY_3, name: "acc3" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_4 || process.env.MINIMAX_API_KEY_4, name: "acc4" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_5 || process.env.MINIMAX_API_KEY_5, name: "acc5" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_6 || process.env.MINIMAX_API_KEY_6, name: "acc6" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_7 || process.env.MINIMAX_API_KEY_7, name: "acc7" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_8 || process.env.MINIMAX_API_KEY_8, name: "acc8" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_9 || process.env.MINIMAX_API_KEY_9, name: "acc9" },
+          { key: process.env.MINIMAX_SUBSCRIPTION_KEY_10 || process.env.MINIMAX_API_KEY_10, name: "acc10" }
         ];
 
 
@@ -1901,9 +2083,9 @@ app.post("/api/clone-voice", async (req,res) => {
             console.log("File uploaded to MiniMax:", acc.name, "file_id:", fileId);
 
             // Step 2: Clone voice
-            const cloneRes = await axios.post(
+                        const cloneRes = await axios.post(
               "https://api.minimax.io/v1/voice_clone",
-              { file_id: fileId, voice_id: minimaxVoiceId, noise_reduction: fields.noiseReduction?.[0] === "true" || fields.noiseReduction === "true" },
+              { file_id: fileId, voice_id: minimaxVoiceId, noise_reduction: fields.noiseReduction?.[0] === "true" || fields.noiseReduction === "true", model: "speech-2.8-hd", text: "Hello, this is a preview of your cloned voice on AudLabs." },
               { headers: { Authorization: `Bearer ${acc.key}`, "Content-Type": "application/json" }, timeout: 30000 }
             );
             if(cloneRes.data?.base_resp?.status_code === 0){
@@ -2504,9 +2686,13 @@ app.post("/api/generate-voice", async (req,res) => {
         }
       }
     }
-    // Only check individual credits if not a team member
+        // Only check individual credits if not a team member
     if(!isTeamMember){
-      const individualCredits = userDoc.data()?.credits || 0;
+      const legacyCredits = userDoc.data()?.credits || 0;
+      let monthlyCredits = userDoc.data()?.monthlyCredits || 0;
+      const monthlyExpiresAt = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
+      if(monthlyExpiresAt && monthlyExpiresAt < new Date()) monthlyCredits = 0;
+      const individualCredits = legacyCredits + monthlyCredits;
       const cost = text.length;
       if(!user.email_verified){
         return res.status(403).json({ error:"Please verify your email address before generating. Check your inbox for the verification link." });
@@ -2986,12 +3172,9 @@ app.post("/api/flutterwave-webhook", express.raw({ type:"*/*" }), async (req,res
     const payData = payDoc.data();
     if (payData.status === "completed") return res.json({ received:true, duplicate:true });
  // Credit user
-    const creditsToAdd = payData.creditsAmount;
+        const creditsToAdd = payData.creditsAmount;
 
-    await db.collection("users").doc(payData.uid).update({
-      credits: admin.firestore.FieldValue.increment(creditsToAdd),
-      hasPurchased: true,
-    });
+    await addMonthlyCredits(payData.uid, creditsToAdd);
 const today = new Date().toISOString().split("T")[0];
     await db.collection("stats").doc("revenue").set({
       totalUSD: admin.firestore.FieldValue.increment(payData.amountUSD || 0),
@@ -3049,10 +3232,8 @@ app.post("/api/verify-card-payment", async (req,res) => {
       if (!payDoc.exists) return res.status(400).json({ error:"Payment not found" });
       const payData = payDoc.data();
       if (payData.status === "completed") return res.json({ success:true, alreadyCredited:true });
-      const creditsToAdd = payData.creditsAmount;
-      await db.collection("users").doc(user.uid).update({
-        credits: admin.firestore.FieldValue.increment(creditsToAdd)
-      });
+            const creditsToAdd = payData.creditsAmount;
+      await addMonthlyCredits(payData.uid, creditsToAdd);
       await db.collection("users").doc(user.uid).collection("transactions").add({
         type:"credit", amount:creditsToAdd,
         note:`Card top-up — $${payData.amountUSD} — ${creditsToAdd.toLocaleString()} credits`,
@@ -3133,6 +3314,16 @@ app.get("/privacy-policy", (req,res) => {
 });
 app.get("/seyi", (req,res) => {
   res.sendFile(path.join(__dirname, "public", "seyi.html"));
+});
+app.get("/mobile", (req,res) => {
+  res.sendFile(path.join(__dirname, "public", "mobile.html"));
+});
+app.get("/get-app", (req,res) => {
+  const ua = req.headers["user-agent"] || "";
+  if(/iphone|ipad|ipod/i.test(ua)){
+    return res.redirect("https://audlabs.io/mobile?ios=soon");
+  }
+  return res.redirect("https://play.google.com/store/apps/details?id=io.audlabs.app");
 });
 // ── SITEMAP ──
 app.get("/sitemap.xml", async (req,res) => {
@@ -4501,6 +4692,27 @@ app.post("/api/contact-form", async (req,res) => {
     return res.status(500).json({ error:"Failed to send message. Please try again." });
   }
 });
+// ── ADMIN: LIST HIGH-BALANCE USERS FOR CREDIT EXPIRY NOTICE ──
+app.get("/api/admin/high-balance-users", async (req,res) => {
+  const isAdmin = req.headers["x-admin-secret"] === "audlabs-admin-2026";
+  if(!isAdmin) return res.status(401).json({ error:"Unauthorized" });
+  try {
+    const snap = await db.collection("users").where("credits", ">=", 25000).get();
+    const users = snap.docs.map(function(d){
+      const data = d.data();
+      return {
+        uid: d.id,
+        email: data.email || "",
+        name: data.displayName || (data.email ? data.email.split("@")[0] : "there"),
+        credits: data.credits || 0
+      };
+    }).sort(function(a,b){ return b.credits - a.credits; });
+    return res.json({ success:true, users: users, count: users.length });
+  } catch(e){
+    console.error("High balance users fetch error:", e.message);
+    return res.status(500).json({ error:e.message });
+  }
+});
 // ── ADMIN: LIST SUPPORT TICKETS ──
 app.get("/api/admin/tickets-list", async (req,res) => {
   const isAdmin = req.headers["x-admin-secret"] === "audlabs-admin-2026";
@@ -4521,6 +4733,113 @@ app.get("/api/admin/tickets-list", async (req,res) => {
     });
     return res.json({ success:true, tickets: tickets });
   } catch(e){
+    return res.status(500).json({ error:e.message });
+  }
+});
+// ── ADMIN: MIGRATE LEGACY CREDITS TO MONTHLY (WITH FIXED EXPIRY) ──
+app.post("/api/admin/migrate-legacy-credits", async (req,res) => {
+  const isAdmin = req.headers["x-admin-secret"] === "audlabs-admin-2026";
+  if(!isAdmin) return res.status(401).json({ error:"Unauthorized" });
+  try {
+    const { uids, expiryDateISO } = req.body;
+    if(!uids || !Array.isArray(uids) || !uids.length) return res.status(400).json({ error:"uids array is required" });
+    if(!expiryDateISO) return res.status(400).json({ error:"expiryDateISO is required" });
+    const expiryTimestamp = admin.firestore.Timestamp.fromDate(new Date(expiryDateISO));
+    let migratedCount = 0;
+    let failedUids = [];
+    for(const uid of uids){
+      try {
+        const userRef = db.collection("users").doc(uid);
+        const userDoc = await userRef.get();
+        if(!userDoc.exists) continue;
+        const legacyAmount = userDoc.data().credits || 0;
+        if(legacyAmount <= 0) continue;
+        await userRef.update({
+          credits: 0,
+          monthlyCredits: admin.firestore.FieldValue.increment(legacyAmount),
+          monthlyCreditsExpiresAt: expiryTimestamp
+        });
+        migratedCount++;
+      } catch(migrateErr){
+        console.warn("Migration failed for uid:", uid, migrateErr.message);
+        failedUids.push(uid);
+      }
+    }
+    return res.json({ success:true, migratedCount: migratedCount, failedCount: failedUids.length, failed: failedUids });
+  } catch(e){
+    console.error("Migrate legacy credits error:", e.message);
+    return res.status(500).json({ error:e.message });
+  }
+});
+// ── ADMIN: SEND CREDIT EXPIRY NOTICE ──
+app.post("/api/admin/send-credit-expiry-notice", async (req,res) => {
+  const isAdmin = req.headers["x-admin-secret"] === "audlabs-admin-2026";
+  if(!isAdmin) return res.status(401).json({ error:"Unauthorized" });
+  try {
+        const { uids, expiryDate, testEmail, testName, testCredits } = req.body;
+    if(!expiryDate) return res.status(400).json({ error:"expiryDate is required" });
+    if(testEmail){
+      await audlabsTransporter.sendMail({
+        from: '"AudLabs" <hello@audlabs.io>',
+        to: testEmail,
+        subject: "[TEST] Important: Your AudLabs credits are expiring soon",
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:20px 0;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);"><tr><td style="background:#0a1628;padding:24px 32px;text-align:left;"><span style="font-size:22px;font-weight:700;color:#c9a84c;letter-spacing:1px;">AudLabs</span></td></tr><tr><td style="padding:32px;"><p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Hi ${testName||"there"},</p><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">I wanted to reach out to you personally about something important regarding your AudLabs account.</p><div style="background:#fffdf7;border:1.5px solid #f0e5c0;border-radius:8px;padding:16px 20px;margin-bottom:16px;"><p style="font-size:14px;color:#333;line-height:1.8;margin:0;">You currently have <strong>${(testCredits||0).toLocaleString()} credits</strong> sitting unused, and I want to be upfront with you: as part of moving AudLabs to a more sustainable model, these credits will now expire 30 days from today — specifically on <strong>${expiryDate}</strong>.</p></div><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">I know this is a change from what was originally promised, and I'm sorry for that. The honest reason is that keeping credits available forever isn't something the platform can sustain long-term, and this change lets us keep AudLabs reliable and consistently available for everyone, including you.</p><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">If you have any content plans coming up, I'd genuinely encourage you to put these credits to use before ${expiryDate}. And if you have any concerns or this creates a real problem for you, please just reply — I want to work with you directly on this, not just spring it on you.</p><p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 24px;">Thank you for being part of AudLabs from early on. I appreciate you.</p><p style="font-size:14px;color:#555;line-height:1.7;margin:0 0 4px;">Regards,</p><p style="font-size:15px;color:#333;margin:0;"><strong>Adeyemo Oluwaseyi</strong><br><span style="font-size:13px;color:#888;">Founder, AudLabs</span></p></td></tr><tr><td style="background:#f8f9fa;padding:16px 32px;border-top:1px solid #eee;"><p style="font-size:11px;color:#bbb;margin:0;text-align:center;">AudLabs · audlabs.io</p></td></tr></table></td></tr></table></body></html>`
+      });
+      return res.json({ success:true, test:true });
+    }
+    if(!uids || !Array.isArray(uids) || !uids.length) return res.status(400).json({ error:"uids array is required" });
+    let sentCount = 0;
+    let failedEmails = [];
+        for(const uid of uids){
+      try {
+        const userDoc = await db.collection("users").doc(uid).get();
+        if(!userDoc.exists) continue;
+        const userData = userDoc.data();
+        const email = userData.email;
+        const name = userData.displayName || (email ? email.split("@")[0] : "there");
+        const credits = userData.credits || 0;
+        if(!email) continue;
+        await new Promise(function(resolve){ setTimeout(resolve, 150); });
+        await audlabsTransporter.sendMail({
+          from: '"AudLabs" <hello@audlabs.io>',
+          to: email,
+          subject: "Important: Your AudLabs credits are expiring soon",
+          html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+<tr><td style="background:#0a1628;padding:24px 32px;text-align:left;">
+<span style="font-size:22px;font-weight:700;color:#c9a84c;letter-spacing:1px;">AudLabs</span>
+</td></tr>
+<tr><td style="padding:32px;">
+<p style="font-size:15px;color:#333;line-height:1.7;margin:0 0 16px;">Hi ${name},</p>
+<p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">I wanted to reach out to you personally about something important regarding your AudLabs account.</p>
+<div style="background:#fffdf7;border:1.5px solid #f0e5c0;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
+<p style="font-size:14px;color:#333;line-height:1.8;margin:0;">You currently have <strong>${credits.toLocaleString()} credits</strong> sitting unused, and I want to be upfront with you: as part of moving AudLabs to a more sustainable model, these credits will now expire 30 days from today — specifically on <strong>${expiryDate}</strong>.</p>
+</div>
+<p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">I know this is a change from what was originally promised, and I'm sorry for that. The honest reason is that keeping credits available forever isn't something the platform can sustain long-term, and this change lets us keep AudLabs reliable and consistently available for everyone, including you.</p>
+<p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 16px;">If you have any content plans coming up, I'd genuinely encourage you to put these credits to use before ${expiryDate}. And if you have any concerns or this creates a real problem for you, please just reply — I want to work with you directly on this, not just spring it on you.</p>
+<p style="font-size:14px;color:#555;line-height:1.8;margin:0 0 24px;">Thank you for being part of AudLabs from early on. I appreciate you.</p>
+<p style="font-size:14px;color:#555;line-height:1.7;margin:0 0 4px;">Regards,</p>
+<p style="font-size:15px;color:#333;margin:0;"><strong>Adeyemo Oluwaseyi</strong><br><span style="font-size:13px;color:#888;">Founder, AudLabs</span></p>
+</td></tr>
+<tr><td style="background:#f8f9fa;padding:16px 32px;border-top:1px solid #eee;">
+<p style="font-size:11px;color:#bbb;margin:0;text-align:center;">AudLabs · audlabs.io</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`
+        });
+        sentCount++;
+      } catch(sendErr){
+        console.warn("Failed to send to uid:", uid, sendErr.message);
+        failedEmails.push(uid);
+      }
+    }
+    return res.json({ success:true, sentCount: sentCount, failedCount: failedEmails.length, failed: failedEmails });
+  } catch(e){
+    console.error("Send credit expiry notice error:", e.message);
     return res.status(500).json({ error:e.message });
   }
 });
@@ -5596,6 +5915,8 @@ return res.json({ success:true, user:{
   email: d.email||"",
   displayName: d.displayName||d.name||"",
   credits: d.credits||0,
+  monthlyCredits: d.monthlyCredits||0,
+  monthlyCreditsExpiresAt: d.monthlyCreditsExpiresAt ? d.monthlyCreditsExpiresAt.toMillis() : null,
   totalGenerations: d.totalGenerations||0,
   totalCharacters: d.totalCharacters||0,
   teamId: d.teamId||"",
@@ -5689,11 +6010,13 @@ app.get("/api/admin-stats", async (req,res) => {
           voiceCount[v] = (voiceCount[v]||0) + d.voiceCount[v];
         });
       }
-      recentUsers.push({
+            recentUsers.push({
         id: doc.id,
         email: d.email||"",
         displayName: d.displayName||"",
         credits: d.credits||0,
+        monthlyCredits: d.monthlyCredits||0,
+        monthlyCreditsExpiresAt: d.monthlyCreditsExpiresAt ? d.monthlyCreditsExpiresAt.toMillis() : null,
         totalGenerations: d.totalGenerations||0,
         totalCharacters: d.totalCharacters||0,
         teamId: d.teamId||"",

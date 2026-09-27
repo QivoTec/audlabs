@@ -220,6 +220,7 @@ th:nth-child(11),td:nth-child(11){display:none;}
 <th>Name</th>
 <th>UID</th>
 <th>Credits</th>
+<th>Expiry</th>
 <th>Voiceovers</th>
 <th>Chars</th>
 <th>Referrals</th>
@@ -520,7 +521,10 @@ window.openUserDetail = async function(uid){
       '<div style="background:#1a1a1a;border-radius:8px;padding:14px;grid-column:1/-1;"><div style="font-size:11px;color:#555;margin-bottom:4px;">UID</div><div style="font-size:11px;color:#888;font-family:monospace;word-break:break-all;">'+uid+'</div></div>'+
       '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">REFERRAL CODE</div><div style="font-size:13px;color:#c9a84c;">'+(u.referralCode||"—")+'</div></div>'+
       '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">REFERRAL RATE</div><div style="font-size:13px;color:#ddd;">'+(u.referralRate||10)+'%</div></div>'+
-      '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">CREDITS</div><div style="font-size:16px;font-weight:700;color:#c9a84c;">'+(u.credits||0).toLocaleString()+'</div></div>'+
+            '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">TOTAL CREDITS</div><div style="font-size:16px;font-weight:700;color:#c9a84c;">'+(((u.credits||0)+(u.monthlyCredits||0))).toLocaleString()+'</div></div>'+
+      '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">LEGACY CREDITS (LIFETIME)</div><div style="font-size:14px;color:#ddd;">'+(u.credits||0).toLocaleString()+'</div></div>'+
+      '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">MONTHLY CREDITS</div><div style="font-size:14px;color:#ddd;">'+(u.monthlyCredits||0).toLocaleString()+'</div></div>'+
+      '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">MONTHLY EXPIRES</div><div style="font-size:14px;color:#ddd;">'+(u.monthlyCreditsExpiresAt ? new Date(u.monthlyCreditsExpiresAt).toLocaleDateString() : "—")+'</div></div>'+
       '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">TOTAL GENERATIONS</div><div style="font-size:16px;font-weight:700;color:#ddd;">'+(u.totalGenerations||0).toLocaleString()+'</div></div>'+
       '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">TOTAL CHARACTERS</div><div style="font-size:13px;color:#ddd;">'+(u.totalCharacters||0).toLocaleString()+'</div></div>'+
       '<div style="background:#1a1a1a;border-radius:8px;padding:14px;"><div style="font-size:11px;color:#555;margin-bottom:4px;">REFERRALS MADE</div><div style="font-size:16px;font-weight:700;color:'+(u.referralCount>0?'#c9a84c':'#555')+'">'+(u.referralCount||0)+'</div></div>'+
@@ -659,7 +663,13 @@ var tbody = document.getElementById("users-tbody");
 tbody.innerHTML = users.map(function(u,i){
 var date = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—";
 var teamBadge = u.teamId ? '<span class="badge badge-gold">'+(u.teamRole||"member")+'</span>' : '<span class="badge badge-grey">—</span>';
-var creditColor = u.credits > 10000 ? "#27ae60" : u.credits > 1000 ? "#c9a84c" : "#e74c3c";
+var monthlyCreds = u.monthlyCredits || 0;
+var monthlyExpiry = u.monthlyCreditsExpiresAt ? new Date(u.monthlyCreditsExpiresAt) : null;
+var isMonthlyExpired = monthlyExpiry && monthlyExpiry < new Date();
+if(isMonthlyExpired) monthlyCreds = 0;
+var totalCredits = (u.credits||0) + monthlyCreds;
+var expiryLabel = (monthlyExpiry && !isMonthlyExpired) ? monthlyExpiry.toLocaleDateString() : "—";
+var creditColor = totalCredits > 10000 ? "#27ae60" : totalCredits > 1000 ? "#c9a84c" : "#e74c3c";
 var referredBadge = u.referredBy ? '<span class="badge badge-green">referred</span>' : '<span class="badge badge-grey">organic</span>';
 var chars = (u.totalCharacters||0).toLocaleString();
 var uid = u.id || "—";
@@ -671,7 +681,8 @@ return '<tr onclick="openUserDetail(\''+uid+'\')" style="cursor:pointer;">'+
 '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+u.email+'</td>'+
 '<td style="color:#888;white-space:nowrap;">'+(u.displayName||"—")+'</td>'+
 '<td style="font-family:monospace;font-size:11px;color:#555;" title="'+uid+'">'+shortUid+'</td>'+
-'<td style="color:'+creditColor+';font-weight:600;">'+u.credits.toLocaleString()+'</td>'+
+'<td style="color:'+creditColor+';font-weight:600;">'+totalCredits.toLocaleString()+'</td>'+
+'<td style="color:#888;font-size:11px;white-space:nowrap;">'+expiryLabel+'</td>'+
 '<td>'+u.totalGenerations.toLocaleString()+'</td>'+
 '<td>'+chars+'</td>'+
 '<td style="color:'+(referrals>0?'#c9a84c':'#888')+';font-weight:'+(referrals>0?'700':'400')+'">'+(referrals>0?'👥 '+referrals:referrals)+'</td>'+
