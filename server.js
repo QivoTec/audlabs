@@ -4358,11 +4358,14 @@ app.get("/api/minimax-quota", async (req,res) => {
         const statusCode = testRes.data?.base_resp?.status_code;
         const statusMsg = testRes.data?.base_resp?.status_msg || "";
         console.log("QUOTA CHECK — "+acc.name+" ("+acc.email+"): status_code="+statusCode+" status_msg=\""+statusMsg+"\" has_audio="+!!testRes.data?.data?.audio);
+                const isActive = statusCode === 0 && !!testRes.data?.data?.audio;
         const isLimited = statusCode === 1002 || statusCode === 2056 || statusMsg.includes("limit") || statusMsg.includes("quota");
         results.push({
           name: acc.name,
           email: acc.email,
-          status: isLimited ? "limited" : "active"
+          status: isActive ? "active" : (isLimited ? "limited" : "inactive"),
+          statusCode: statusCode,
+          statusMsg: statusMsg
         });
 
       } catch(e){
