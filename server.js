@@ -4006,19 +4006,33 @@ else if(duration === "long"){ params.min_duration = 20; }
     } catch(expandErr){
       console.warn("Search expansion failed:", expandErr.message);
     }
+        const resultLists = [];
+    for(let qi = 0; qi < queries.length; qi++){
+      const qParams = Object.assign({}, params, { query: queries[qi], per_page: qi === 0 ? 12 : 6 });
+      try {
+        const qRes = await axios.get("https://api.pexels.com/videos/search", {
+          headers: { Authorization: process.env.PEXELS_API_KEY },
+          params: qParams
+        });
+        resultLists.push(qRes.data.videos||[]);
+      } catch(qErr){
+        console.warn("Pexels query failed:", queries[qi], qErr.message);
+        if(qi === 0) throw qErr;
+        resultLists.push([]);
+      }
+    }
     const mergedVideos = [];
     const seenVideoIds = {};
-    for(const q of queries){
-      const qParams = Object.assign({}, params, { query: q, per_page: 6 });
-      const qRes = await axios.get("https://api.pexels.com/videos/search", {
-        headers: { Authorization: process.env.PEXELS_API_KEY },
-        params: qParams
+    const addVideos = function(list){
+      list.forEach(function(v){
+        if(mergedVideos.length < 12 && !seenVideoIds[v.id]){ seenVideoIds[v.id] = true; mergedVideos.push(v); }
       });
-      (qRes.data.videos||[]).forEach(function(v){
-        if(!seenVideoIds[v.id]){ seenVideoIds[v.id] = true; mergedVideos.push(v); }
-      });
-    }
-    const pexelsRes = { data: { videos: mergedVideos.slice(0,12) } };
+    };
+    addVideos(resultLists[0].slice(0,6));
+    for(let li = 1; li < resultLists.length; li++){ addVideos(resultLists[li].slice(0,3)); }
+    addVideos(resultLists[0]);
+    for(let li = 1; li < resultLists.length; li++){ addVideos(resultLists[li]); }
+    const pexelsRes = { data: { videos: mergedVideos } };
     const videos = (pexelsRes.data.videos||[]).map(function(v){
       let file;
       if(resolution === "4k"){
