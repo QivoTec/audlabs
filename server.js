@@ -4093,7 +4093,17 @@ app.post("/api/script-to-videos", async (req,res) => {
           max_tokens: 150,
           messages: [{
             role: "user",
-            content: `You are a professional video editor${niche ? " specializing in "+niche+" content" : ""}. Extract 3 precise visual search keywords for finding cinematic stock footage that perfectly matches this script paragraph. Return ONLY a JSON array of 3 short 1-3 word search terms, nothing else. Example: ["aerial city night", "ocean waves crashing", "crowd cheering stadium"]\n\nParagraph: "${section.slice(0,300)}"`
+                        content: `You are a professional video editor${niche ? " specializing in "+niche+" content" : ""}. Find the best stock footage search terms for this script paragraph.
+
+Rules:
+- Return ONLY a JSON array of 3 search terms, with no other text.
+- Each term must be 2-4 words and describe something that can actually be filmed.
+- If the script is about a specific country, city or landmark, put that place name in EVERY term (for example "Marrakech medina market", not "busy market").
+- Order the terms from most specific to most general.
+
+Overall script (use it to find the place name): "${script.slice(0,600)}"
+
+Paragraph to match: "${section.slice(0,300)}"`
           }]
         }, {
           headers: {
@@ -4104,7 +4114,8 @@ app.post("/api/script-to-videos", async (req,res) => {
           }
         });
         const responseText = claudeRes.data.content[0].text.trim();
-        keywords = JSON.parse(responseText);
+                var jsonMatch = responseText.match(/\[[\s\S]*\]/);
+        keywords = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
       } catch(aiErr){
         console.warn("Claude keyword extraction failed:", aiErr.message);
         // Fallback to simple extraction
@@ -4114,22 +4125,31 @@ app.post("/api/script-to-videos", async (req,res) => {
         keywords = Object.keys(freq).sort(function(a,b){ return freq[b]-freq[a]; }).slice(0,3);
         if(keywords.length === 0) keywords = ["nature"];
       }
-      // Search Pexels for matching videos
+            // Search Pexels for matching videos (try each keyword until we have enough clips)
       const searchQuery = keywords[0] || "nature";
       try {
-        const params = {
-          query: searchQuery,
-          per_page: 10,
-          orientation: orientation
-        };
-        // Add duration filter
-        if(duration === "short") { params.min_duration = 5; params.max_duration = 10; }
-        else if(duration === "medium") { params.min_duration = 10; params.max_duration = 20; }
-        else if(duration === "long") { params.min_duration = 20; }
-        const pexelsRes = await axios.get("https://api.pexels.com/videos/search", {
-          headers: { Authorization: process.env.PEXELS_API_KEY },
-          params
-        });
+        const pexelsVideos = [];
+        const seenIds = {};
+        for(const kw of keywords.slice(0,3)){
+          if(pexelsVideos.length >= 8) break;
+          const params = {
+            query: kw,
+            per_page: 10,
+            orientation: orientation
+          };
+          if(duration === "vshort") { params.min_duration = 1; params.max_duration = 5; }
+          else if(duration === "short") { params.min_duration = 5; params.max_duration = 10; }
+          else if(duration === "medium") { params.min_duration = 10; params.max_duration = 20; }
+          else if(duration === "long") { params.min_duration = 20; }
+          const kwRes = await axios.get("https://api.pexels.com/videos/search", {
+            headers: { Authorization: process.env.PEXELS_API_KEY },
+            params
+          });
+          (kwRes.data.videos||[]).forEach(function(v){
+            if(!seenIds[v.id]){ seenIds[v.id] = true; pexelsVideos.push(v); }
+          });
+        }
+        const pexelsRes = { data: { videos: pexelsVideos.slice(0,10) } };
         let videos = (pexelsRes.data.videos||[]).map(function(v){
           // Select file based on resolution preference
           let file;
