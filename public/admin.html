@@ -752,8 +752,8 @@ async function loadMinimaxQuota(){
     if(!data.success) return;
     var list = document.getElementById("minimax-quota-list");
     list.innerHTML = data.accounts.map(function(acc){
-      var statusColor = acc.status === "active" ? "#27ae60" : acc.status === "limited" ? "#e74c3c" : "#888";
-      var statusText = acc.status === "active" ? "✅ Active" : acc.status === "limited" ? "⛔ Limited" : "❌ Error";
+            var statusColor = acc.status === "active" ? "#27ae60" : (acc.status === "limited" || acc.status === "inactive") ? "#e74c3c" : "#888";
+      var statusText = acc.status === "active" ? "✅ Active" : acc.status === "limited" ? "⛔ Limited" : acc.status === "inactive" ? "⛔ Inactive" : "❌ Error";
       return '<div style="background:#1a1a1a;border-radius:10px;padding:14px;border:1px solid #222;">'+
         '<div style="font-size:12px;font-weight:600;color:#ddd;margin-bottom:4px;">'+acc.name+'</div>'+
         '<div style="font-size:10px;color:#888;margin-bottom:8px;">'+(acc.email||"—")+'</div>'+
