@@ -4373,7 +4373,7 @@ app.get("/api/minimax-quota", async (req,res) => {
         results.push({
           name: acc.name,
           email: acc.email,
-          status: e.response?.status === 429 ? "limited" : "error",
+                    status: e.response?.status === 429 ? "limited" : (e.response ? "inactive" : "error"),
           statusMsg: e.message
         });
       }
