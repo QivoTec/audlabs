@@ -3979,10 +3979,46 @@ app.post("/api/search-videos", async (req,res) => {
 else if(duration === "short"){ params.min_duration = 5; params.max_duration = 10; }
 else if(duration === "medium"){ params.min_duration = 10; params.max_duration = 20; }
 else if(duration === "long"){ params.min_duration = 20; }
-    const pexelsRes = await axios.get("https://api.pexels.com/videos/search", {
-      headers: { Authorization: process.env.PEXELS_API_KEY },
-      params
-    });
+        // Expand the search into specific phrases so results match the place or topic
+    let queries = [query];
+    try {
+      const expandRes = await axios.post("https://api.anthropic.com/v1/messages", {
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 100,
+        messages: [{
+          role: "user",
+          content: `A user is searching stock footage for: "${query.slice(0,100)}". Return ONLY a JSON array of 2 extra search phrases (2-4 words each) that would find footage of the same place or subject. If it is a region, country or city, use well-known landmarks or scenes that can be filmed there and keep the place name in each phrase. If it is not a place, use different visual angles of the same subject. No other text. Example for "Patagonia": ["Torres del Paine mountains", "Perito Moreno glacier"]`
+        }]
+      }, {
+        headers: {
+          "x-api-key": process.env.ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json"
+        },
+        timeout: 8000
+      });
+      const expandText = expandRes.data.content[0].text.trim();
+      const expandMatch = expandText.match(/\[[\s\S]*\]/);
+      const extra = JSON.parse(expandMatch ? expandMatch[0] : expandText);
+      extra.slice(0,2).forEach(function(q){
+        if(typeof q === "string" && q.trim()) queries.push(q.trim());
+      });
+    } catch(expandErr){
+      console.warn("Search expansion failed:", expandErr.message);
+    }
+    const mergedVideos = [];
+    const seenVideoIds = {};
+    for(const q of queries){
+      const qParams = Object.assign({}, params, { query: q, per_page: 6 });
+      const qRes = await axios.get("https://api.pexels.com/videos/search", {
+        headers: { Authorization: process.env.PEXELS_API_KEY },
+        params: qParams
+      });
+      (qRes.data.videos||[]).forEach(function(v){
+        if(!seenVideoIds[v.id]){ seenVideoIds[v.id] = true; mergedVideos.push(v); }
+      });
+    }
+    const pexelsRes = { data: { videos: mergedVideos.slice(0,12) } };
     const videos = (pexelsRes.data.videos||[]).map(function(v){
       let file;
       if(resolution === "4k"){
