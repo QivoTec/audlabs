@@ -2347,7 +2347,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
       },
       { headers: { Authorization:`Bearer ${MK}`, "Content-Type":"application/json" }}
     );
-    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("voice_id"))){
+    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient") || response.data.base_resp.status_msg?.includes("voice_id"))){
       throw new Error("Rate limit hit on primary key");
     }
     } catch(primaryErr){
@@ -2365,7 +2365,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
         },
         { headers: { Authorization:`Bearer ${MK2}`, "Content-Type":"application/json" }}
       );
-      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("voice_id"))){
+      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient") || response.data.base_resp.status_msg?.includes("voice_id"))){
         throw new Error("Rate limit hit on secondary key");
       }
       } catch(secondaryErr){
@@ -2383,7 +2383,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
           },
           { headers: { Authorization:`Bearer ${MK3}`, "Content-Type":"application/json" }}
         );
-        if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("voice_id"))){
+        if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient") || response.data.base_resp.status_msg?.includes("voice_id"))){
           throw new Error("Rate limit hit on tertiary key");
         }
         } catch(tertiaryErr){
@@ -2401,7 +2401,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
             },
             { headers: { Authorization:`Bearer ${MK4}`, "Content-Type":"application/json" }}
           );
-          if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+          if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
             throw new Error("Rate limit hit on quaternary key");
           }
           } catch(quaternaryErr){
@@ -2419,7 +2419,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
                 },
                 { headers: { Authorization:`Bearer ${MK5}`, "Content-Type":"application/json" }}
               );
-              if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+              if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                 throw new Error("Rate limit hit on quinary key for preview");
               }
             } catch(quinaryErr){
@@ -2437,7 +2437,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
                   },
                   { headers: { Authorization:`Bearer ${MK6}`, "Content-Type":"application/json" }}
                 );
-                if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                   throw new Error("Rate limit hit on senary key for preview");
                 }
               } catch(senaryErr){
@@ -2455,7 +2455,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
                     },
                     { headers: { Authorization:`Bearer ${MK7}`, "Content-Type":"application/json" }}
                   );
-                  if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                  if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                     throw new Error("Rate limit hit on septenary key for preview");
                   }
                 } catch(septenaryErr){
@@ -2473,7 +2473,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
                       },
                       { headers: { Authorization:`Bearer ${MK8}`, "Content-Type":"application/json" }}
                     );
-                    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                       throw new Error("Rate limit hit on octonary key for preview");
                     }
                   } catch(octonaryErr){
@@ -2491,7 +2491,7 @@ if(voiceId.startsWith("voice_") || voiceId.startsWith("moss_audio_")){
                         },
                         { headers: { Authorization:`Bearer ${MK9}`, "Content-Type":"application/json" }}
                       );
-                      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                         throw new Error("Rate limit hit on nonary key for preview");
                       }
                     } catch(nonaryErr){
@@ -2835,7 +2835,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
       },
       { headers: { Authorization:`Bearer ${MK}`, "Content-Type":"application/json" }, timeout: 20000 }
     );
-    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("voice_id"))){
+    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient") || response.data.base_resp.status_msg?.includes("voice_id"))){
       throw new Error("Rate limit hit on primary key");
     }
    } catch(primaryErr){
@@ -2910,7 +2910,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
         },
         { headers: { Authorization:`Bearer ${MK2}`, "Content-Type":"application/json" }, timeout: 20000 }
       );
-      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("voice_id"))){
+      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient") || response.data.base_resp.status_msg?.includes("voice_id"))){
         throw new Error("Rate limit hit on secondary key");
       }
       } catch(secondaryErr){
@@ -2928,7 +2928,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
           },
           { headers: { Authorization:`Bearer ${MK3}`, "Content-Type":"application/json" }, timeout: 20000 }
         );
-        if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("voice_id"))){
+        if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient") || response.data.base_resp.status_msg?.includes("voice_id"))){
           throw new Error("Rate limit hit on tertiary key");
         }
         } catch(tertiaryErr){
@@ -2946,7 +2946,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
             },
             { headers: { Authorization:`Bearer ${MK4}`, "Content-Type":"application/json" }, timeout: 20000 }
           );
-          if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("voice_id"))){
+          if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient") || response.data.base_resp.status_msg?.includes("voice_id"))){
             throw new Error("Rate limit hit on quaternary key");
           }
           } catch(quaternaryErr){
@@ -2964,7 +2964,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
                 },
                 { headers: { Authorization:`Bearer ${MK5}`, "Content-Type":"application/json" }, timeout: 20000 }
               );
-              if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+              if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                 throw new Error("Rate limit hit on quinary key");
               }
             } catch(quinaryErr){
@@ -2982,7 +2982,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
                   },
                   { headers: { Authorization:`Bearer ${MK6}`, "Content-Type":"application/json" }, timeout: 20000 }
                 );
-                if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                   throw new Error("Rate limit hit on senary key");
                 }
               } catch(senaryErr){
@@ -3000,7 +3000,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
                     },
                     { headers: { Authorization:`Bearer ${MK7}`, "Content-Type":"application/json" }, timeout: 20000 }
                   );
-                  if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                  if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                     throw new Error("Rate limit hit on septenary key");
                   }
                 } catch(septenaryErr){
@@ -3018,7 +3018,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
                       },
                       { headers: { Authorization:`Bearer ${MK8}`, "Content-Type":"application/json" }, timeout: 20000 }
                     );
-                    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                    if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                       throw new Error("Rate limit hit on octonary key");
                     }
                   } catch(octonaryErr){
@@ -3036,7 +3036,7 @@ var voiceId10 = voiceIdMap10[voiceId] || voiceId;
                         },
                         { headers: { Authorization:`Bearer ${MK9}`, "Content-Type":"application/json" }, timeout: 20000 }
                       );
-                      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access"))){
+                      if(response.data && response.data.base_resp && (response.data.base_resp.status_code === 1002 || response.data.base_resp.status_code === 2056 || response.data.base_resp.status_code === 1008 || response.data.base_resp.status_msg?.includes("limit") || response.data.base_resp.status_msg?.includes("access") || response.data.base_resp.status_msg?.includes("insufficient"))){
                         throw new Error("Rate limit hit on nonary key");
                       }
                     } catch(nonaryErr){
