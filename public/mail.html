@@ -200,17 +200,29 @@ async function confirmSend(){
     slug = await saveCampaign(true);
     if(!slug) return;
   }
-  btn.disabled = true; btn.textContent = "Sending...";
+  btn.disabled = true;
+  let totalSent = 0, totalFailed = 0, batchNum = 0;
   try{
-    const res = await fetch(BACKEND + "/api/admin/send-campaign-v2", {
-      method: "POST",
-      headers: {"Content-Type":"application/json","x-admin-secret":adminPassword},
-      body: JSON.stringify({ slug })
-    });
-    const data = await res.json();
-    if(data.success){ showStatus(`✅ Sent to ${data.sent} users (${data.failed} failed).`, true); loadCampaigns(); }
-    else { showStatus(data.error || "Failed to send", false); }
-  }catch(e){ showStatus("Error: " + e.message, false); }
+    while(true){
+      batchNum++;
+      btn.textContent = "Sending batch "+batchNum+"... ("+totalSent+" sent so far)";
+      const res = await fetch(BACKEND + "/api/admin/send-campaign-v2", {
+        method: "POST",
+        headers: {"Content-Type":"application/json","x-admin-secret":adminPassword},
+        body: JSON.stringify({ slug })
+      });
+      const data = await res.json();
+      if(!data.success){ showStatus(data.error || "Failed to send", false); break; }
+      totalSent += data.sent;
+      totalFailed += data.failed;
+      if(data.sent === 0){
+        showStatus(`✅ Done. Sent to ${totalSent} users total (${totalFailed} failed).`, true);
+        loadCampaigns();
+        break;
+      }
+      showStatus(`In progress — ${totalSent} sent so far (batch ${batchNum})...`, true);
+    }
+  }catch(e){ showStatus("Error after "+totalSent+" sent: " + e.message, false); }
   btn.disabled = false; btn.textContent = "Send to All Users";
 }
 async function loadCampaigns(){
