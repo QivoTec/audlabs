@@ -233,27 +233,42 @@ async function addMonthlyCredits(uid, amount) {
     hasPurchased: true
   });
 }
+async function addFreeMonthlyCredits(uid, amount) {
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  await db.collection("users").doc(uid).update({
+    freeMonthlyCredits: amount,
+    freeMonthlyCreditsExpiresAt: admin.firestore.Timestamp.fromDate(endOfMonth),
+    freeMonthlyCreditsGrantedFor: now.getFullYear()+"-"+(now.getMonth()+1)
+  });
+}
 async function deductUserCredits(uid, cost) {
   const ref = db.collection("users").doc(uid);
   const doc = await ref.get();
   const data = doc.exists ? doc.data() : {};
+  let freeCredits = data.freeMonthlyCredits || 0;
+  const freeExpiresAt = data.freeMonthlyCreditsExpiresAt ? data.freeMonthlyCreditsExpiresAt.toDate() : null;
+  if(freeExpiresAt && freeExpiresAt < new Date()){ freeCredits = 0; }
   let monthlyCredits = data.monthlyCredits || 0;
   let legacyCredits = data.credits || 0;
   const expiresAt = data.monthlyCreditsExpiresAt ? data.monthlyCreditsExpiresAt.toDate() : null;
   const isExpired = expiresAt && expiresAt < new Date();
   if(isExpired){ monthlyCredits = 0; }
-  const totalAvailable = monthlyCredits + legacyCredits;
+  const totalAvailable = freeCredits + monthlyCredits + legacyCredits;
   if(totalAvailable < cost){
     return { success: false, available: totalAvailable };
   }
-  const fromMonthly = Math.min(monthlyCredits, cost);
-  const fromLegacy = cost - fromMonthly;
+  const fromFree = Math.min(freeCredits, cost);
+  const remainingAfterFree = cost - fromFree;
+  const fromMonthly = Math.min(monthlyCredits, remainingAfterFree);
+  const fromLegacy = remainingAfterFree - fromMonthly;
   const updates = {
+    freeMonthlyCredits: freeCredits - fromFree,
     monthlyCredits: monthlyCredits - fromMonthly,
     credits: legacyCredits - fromLegacy
   };
   await ref.update(updates);
-  return { success: true, remaining: (monthlyCredits - fromMonthly) + (legacyCredits - fromLegacy) };
+  return { success: true, remaining: (freeCredits - fromFree) + (monthlyCredits - fromMonthly) + (legacyCredits - fromLegacy) };
 }
 async function verifyUser(req, res) {
   const auth = req.headers.authorization;
@@ -1130,14 +1145,20 @@ app.get("/api/balance", async (req,res) => {
   try {
     const doc = await db.collection("users").doc(user.uid).get();
     if (!doc.exists) return res.json({ credits:0, virtualAccount:null });
-        const d = doc.data();
+            const d = doc.data();
+    let freeCredits = d.freeMonthlyCredits || 0;
+    const freeExpiresAt = d.freeMonthlyCreditsExpiresAt ? d.freeMonthlyCreditsExpiresAt.toDate() : null;
+    const isFreeExpired = freeExpiresAt && freeExpiresAt < new Date();
+    if(isFreeExpired) freeCredits = 0;
     let monthlyCredits = d.monthlyCredits || 0;
     const expiresAt = d.monthlyCreditsExpiresAt ? d.monthlyCreditsExpiresAt.toDate() : null;
     const isMonthlyExpired = expiresAt && expiresAt < new Date();
     if(isMonthlyExpired) monthlyCredits = 0;
     const legacyCredits = d.credits || 0;
     return res.json({
-      credits: monthlyCredits + legacyCredits,
+      credits: freeCredits + monthlyCredits + legacyCredits,
+      freeMonthlyCredits: freeCredits,
+      freeMonthlyCreditsExpiresAt: (freeExpiresAt && !isFreeExpired) ? freeExpiresAt.toISOString() : null,
       monthlyCredits: monthlyCredits,
       legacyCredits: legacyCredits,
       monthlyCreditsExpiresAt: (expiresAt && !isMonthlyExpired) ? expiresAt.toISOString() : null,
@@ -6467,7 +6488,7 @@ app.all("/api/monthly-emails", async (req,res) => {
   }
 });
 
-// ── MONTHLY CREDITS ──
+// ── MONTHLY CREDITS (free, expiring pool) ──
 app.all("/api/monthly-credits", async (req,res) => {
   const secret = req.headers["x-cron-secret"] || "";
   const vercelCronSchedule = req.headers["x-vercel-cron-schedule"] || "";
@@ -6478,34 +6499,42 @@ app.all("/api/monthly-credits", async (req,res) => {
   }
 
   try {
+    const now = new Date();
+    const currentMonthKey = now.getFullYear()+"-"+(now.getMonth()+1);
     const usersSnap = await db.collection("users").get();
     let count = 0;
+    let skipped = 0;
     const batchSize = 10;
     const docs = usersSnap.docs;
     for(let i = 0; i < docs.length; i += batchSize){
-
       const batch = db.batch();
       const chunk = docs.slice(i, i + batchSize);
+      const eligible = [];
       for(const doc of chunk){
+        const alreadyGranted = doc.data()?.freeMonthlyCreditsGrantedFor === currentMonthKey;
+        if(alreadyGranted){ skipped++; continue; }
+        eligible.push(doc);
         const userRef = db.collection("users").doc(doc.id);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
         batch.update(userRef, {
-          credits: admin.firestore.FieldValue.increment(2000)
+          freeMonthlyCredits: 2000,
+          freeMonthlyCreditsExpiresAt: admin.firestore.Timestamp.fromDate(endOfMonth),
+          freeMonthlyCreditsGrantedFor: currentMonthKey
         });
         count++;
       }
-      await batch.commit();
+      if(eligible.length) await batch.commit();
 
-            // Add transactions
-      for(const doc of chunk){
+      for(const doc of eligible){
         await db.collection("users").doc(doc.id).collection("transactions").add({
           type:"credit", amount:2000,
-          note:"🎁 Monthly Credits — 2,000 free credits for being an AudLabs User.",
+          note:"🎁 Monthly Credits — 2,000 free credits for being an AudLabs User (expires end of month).",
           createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
       }
     }
-    console.log("✅ Monthly credits distributed to", count, "users");
-    return res.json({ success:true, usersCredited:count, message:"Credits distributed successfully" });
+    console.log("✅ Monthly credits distributed to", count, "users, skipped", skipped, "already granted this month");
+    return res.json({ success:true, usersCredited:count, skippedAlreadyGranted:skipped, message:"Credits distributed successfully" });
 
   } catch(e){
     console.error("Monthly credits error:", e.message);
