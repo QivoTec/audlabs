@@ -1083,7 +1083,7 @@ app.post("/api/deduct-clip-credits", async (req,res) => {
   if (!user) return;
   try {
     const { type } = req.body;
-    const CLIP_COST = type === "all" ? 10000 : 2000;
+        const CLIP_COST = type === "all" ? 5000 : 1500;
     const userDoc = await db.collection("users").doc(user.uid).get();
     const teamId = userDoc.data()?.teamId;
     let isTeamMember = false;
