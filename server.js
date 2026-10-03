@@ -300,6 +300,7 @@ app.use((req,res,next) => {
   express.json({ limit: "10mb" })(req,res,next);
 });
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+require("./mcp")(app, { db, admin, uploadAudioToStorage });
 // ── UPLOAD TEMP AUDIO CHUNK ──
 app.post("/api/upload-audio-chunk", async (req,res) => {
   const user = await verifyUser(req,res);
@@ -6547,8 +6548,6 @@ app.all("/api/monthly-credits", async (req,res) => {
 });
 
 
-
-require("./mcp")(app, { db, admin, uploadAudioToStorage });
 
 const PORT = process.env.PORT || 3000;
 app.get("*", (req,res) => {
