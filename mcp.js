@@ -27,6 +27,9 @@ module.exports = function setupMcp(app, opts) {
   const hash = (t) => crypto.createHash("sha256").update(t).digest("hex");
   const randomToken = () => crypto.randomBytes(32).toString("hex");
   const nowSec = () => Math.floor(Date.now() / 1000);
+  const bucket = opts.bucket || admin.storage().bucket("voicegene.firebasestorage.app");
+  const CLIP_COST = 1500, ALL_CLIPS_COST = 5000, MUSIC_COST = 3000, MAX_CLIPS_PER_CALL = 5;
+  const LANGUAGES = ["English", "French", "Spanish", "German", "Italian", "Russian", "Portuguese", "Ukrainian", "Afrikaans"];
   const toDate = (x) => !x ? null : (typeof x.toDate === "function" ? x.toDate() : (x._seconds ? new Date(x._seconds * 1000) : new Date(x)));
 
   // ── OAuth provider backed by Firestore ──
@@ -206,37 +209,83 @@ module.exports = function setupMcp(app, opts) {
     return (data && data.error) || fallback;
   }
 
+
+  // Call one of AudLabs' own endpoints as the signed-in user (reuses all existing checks and credit logic)
+  async function callApi(uid, method, pathname, body) {
+    const idToken = await getUserIdToken(uid);
+    try {
+      const r = await http.request({
+        method, url: BASE + pathname, data: body,
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + idToken },
+        timeout: 120000
+      });
+      return r.data;
+    } catch (e) {
+      throw new Error(errorFromResponse(e, "AudLabs could not complete that request. Please try again."));
+    }
+  }
+
+  // Save a file to AudLabs storage and return a 48-hour download link (same pattern as voiceovers)
+  async function storeFileForUser(uid, buffer, contentType, ext, folder, downloadName) {
+    const filename = folder + "/" + uid + "/" + Date.now() + "_" + crypto.randomBytes(3).toString("hex") + "." + ext;
+    const file = bucket.file(filename);
+    await file.save(buffer, { metadata: { contentType, contentDisposition: 'attachment; filename="' + downloadName + '"' } });
+    const expiryDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const [url] = await file.getSignedUrl({ action: "read", expires: expiryDate });
+    await db.collection("audioFiles").add({
+      uid, filename, url,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      expiresAt: admin.firestore.Timestamp.fromDate(expiryDate)
+    });
+    return { url, filename };
+  }
+  async function deleteStoredFile(filename) {
+    try { await bucket.file(filename).delete(); } catch (e) {}
+  }
+
+  async function availableCredits(uid) {
+    const doc = await db.collection("users").doc(uid).get();
+    if (!doc.exists) return { total: 0, team: false };
+    const d = doc.data();
+    const now = new Date();
+    const freeExp = toDate(d.freeMonthlyCreditsExpiresAt);
+    const monthlyExp = toDate(d.monthlyCreditsExpiresAt);
+    const free = (freeExp && freeExp > now) ? (d.freeMonthlyCredits || 0) : 0;
+    const monthly = (monthlyExp && monthlyExp > now) ? (d.monthlyCredits || 0) : 0;
+    return { total: free + monthly + (d.credits || 0), team: !!d.teamId, free, monthly, legacy: d.credits || 0, freeExp, monthlyExp, data: d };
+  }
+
+  const fmtDate = (dt) => dt ? dt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "—";
+  const youtubeId = (url) => { const m = String(url || "").match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/); return m ? m[1] : null; };
+
   function textResult(text, isError) {
     return { content: [{ type: "text", text }], isError: !!isError };
   }
 
   // ── The MCP tools ──
   function buildServer(uid) {
-    const server = new McpServer({ name: "AudLabs", version: "1.0.0" });
+    const server = new McpServer({
+      name: "AudLabs",
+      title: "AudLabs",
+      version: "1.1.0",
+      websiteUrl: "https://audlabs.io",
+      icons: [{ src: "https://audlabs.io/logo-icon.png", mimeType: "image/png" }]
+    });
 
     server.registerTool("check_credits", {
       title: "Check AudLabs credits",
       description: "Shows the user's AudLabs credit balance (free monthly, purchased monthly and lifetime credits) and when each expires.",
       inputSchema: {}
     }, async () => {
-      const doc = await db.collection("users").doc(uid).get();
-      if (!doc.exists) return textResult("No AudLabs account found for this user.", true);
-      const d = doc.data();
-      const now = new Date();
-      const freeExp = toDate(d.freeMonthlyCreditsExpiresAt);
-      const monthlyExp = toDate(d.monthlyCreditsExpiresAt);
-      const free = (freeExp && freeExp > now) ? (d.freeMonthlyCredits || 0) : 0;
-      const monthly = (monthlyExp && monthlyExp > now) ? (d.monthlyCredits || 0) : 0;
-      const legacy = d.credits || 0;
-      const fmt = (dt) => dt.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-      const lines = [
-        "Total credits available: " + (free + monthly + legacy).toLocaleString() + " (1 credit = 1 character)",
-        "Free monthly credits: " + free.toLocaleString() + (free && freeExp ? " (expire " + fmt(freeExp) + ")" : ""),
-        "Purchased monthly credits: " + monthly.toLocaleString() + (monthly && monthlyExp ? " (expire " + fmt(monthlyExp) + ")" : ""),
-        "Lifetime credits: " + legacy.toLocaleString(),
+      const c = await availableCredits(uid);
+      if (!c.data) return textResult("No AudLabs account found for this user.", true);
+      return textResult([
+        "Total credits available: " + c.total.toLocaleString() + " (1 credit = 1 character)",
+        "Free monthly credits: " + c.free.toLocaleString() + (c.free ? " (expire " + fmtDate(c.freeExp) + ")" : ""),
+        "Purchased monthly credits: " + c.monthly.toLocaleString() + (c.monthly ? " (expire " + fmtDate(c.monthlyExp) + ")" : ""),
+        "Lifetime credits: " + c.legacy.toLocaleString(),
         "Top up: https://app.audlabs.io/buy-credits"
-      ];
-      return textResult(lines.join("\n"));
+      ].join("\n"));
     });
 
     server.registerTool("list_voices", {
@@ -298,6 +347,252 @@ module.exports = function setupMcp(app, opts) {
         "Download MP3 (link works for 48 hours): " + stored.url +
         (remaining !== null && remaining !== undefined ? "\nCredits remaining: " + Number(remaining).toLocaleString() : "")
       );
+    });
+
+    server.registerTool("get_account_details", {
+      title: "AudLabs account details",
+      description: "Shows the user's AudLabs profile, usage stats, subscription status and their personal bank transfer (virtual) account for topping up credits.",
+      inputSchema: {}
+    }, async () => {
+      const c = await availableCredits(uid);
+      if (!c.data) return textResult("No AudLabs account found for this user.", true);
+      const d = c.data;
+      const lines = [
+        "Name: " + (d.displayName || "—"),
+        "Email: " + (d.email || "—"),
+        "Voiceovers generated: " + (d.totalGenerations || 0).toLocaleString(),
+        "Characters generated: " + (d.totalCharacters || 0).toLocaleString(),
+        "Credits available: " + c.total.toLocaleString(),
+        "Subscription: " + (c.monthly && c.monthlyExp ? "Active, monthly credits expire " + fmtDate(c.monthlyExp) : "No active subscription")
+      ];
+      const vas = Array.isArray(d.virtualAccount) ? d.virtualAccount : (d.virtualAccount ? [d.virtualAccount] : []);
+      if (vas.length) {
+        lines.push("", "Bank transfer account (for buying credits):");
+        vas.forEach(function (va) {
+          const num = va.accountNumber || va.account_number;
+          const bank = va.bankName || va.bank_name;
+          const name = va.accountName || va.account_name;
+          if (num) lines.push("Account number: " + num);
+          if (bank) lines.push("Bank: " + bank);
+          if (name) lines.push("Account name: " + name);
+        });
+        lines.push("Transfer the exact Naira amount shown on the Buy Credits page so your credits are added automatically: https://app.audlabs.io/buy-credits");
+      } else {
+        lines.push("", "No bank transfer account yet. Open https://app.audlabs.io/buy-credits to create one.");
+      }
+      return textResult(lines.join("\n"));
+    });
+
+    server.registerTool("get_youtube_video_stats", {
+      title: "YouTube video stats",
+      description: "Shows when a YouTube video was posted, its views, likes and comments, the channel's details, and the video's tags/keywords. Free.",
+      inputSchema: { video_url: z.string().describe("A YouTube video link") }
+    }, async ({ video_url }) => {
+      try {
+        const data = await callApi(uid, "post", "/api/video-stats", { videoUrl: video_url });
+        const v = data.video, c = data.channel;
+        return textResult([
+          "Title: " + v.title,
+          "Posted: " + new Date(v.publishedAt).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: "UTC" }) + " (UTC)",
+          "Views: " + Number(v.viewCount).toLocaleString() + " · Likes: " + Number(v.likeCount).toLocaleString() + " · Comments: " + Number(v.commentCount).toLocaleString(),
+          "",
+          "Channel: " + c.title + " (created " + fmtDate(new Date(c.publishedAt)) + ")",
+          "Subscribers: " + (c.subscriberCount === "Hidden" ? "Hidden" : Number(c.subscriberCount).toLocaleString()) + " · Videos: " + Number(c.videoCount).toLocaleString() + " · Total views: " + Number(c.viewCount).toLocaleString(),
+          "",
+          "Tags: " + ((v.tags && v.tags.length) ? v.tags.join(", ") : "none")
+        ].join("\n"));
+      } catch (e) { return textResult("Could not get video stats: " + e.message, true); }
+    });
+
+    server.registerTool("get_youtube_thumbnail", {
+      title: "YouTube thumbnail grabber",
+      description: "Returns the full-size thumbnail image link for a YouTube video. Free.",
+      inputSchema: { video_url: z.string().describe("A YouTube video link") }
+    }, async ({ video_url }) => {
+      const id = youtubeId(video_url);
+      if (!id) return textResult("That doesn't look like a valid YouTube video link.", true);
+      return textResult("Full-size thumbnail: https://img.youtube.com/vi/" + id + "/maxresdefault.jpg\nIf that one doesn't load, use this version: https://img.youtube.com/vi/" + id + "/hqdefault.jpg");
+    });
+
+    server.registerTool("translate_script", {
+      title: "Translate a script",
+      description: "Translates a script into another language using the user's AudLabs credits (1 credit per character of the original script). Supported languages: " + LANGUAGES.join(", ") + ".",
+      inputSchema: {
+        text: z.string().min(1).max(60000).describe("The script to translate, up to 60,000 characters"),
+        target_language: z.enum(LANGUAGES)
+      }
+    }, async ({ text, target_language }) => {
+      try {
+        const data = await callApi(uid, "post", "/api/translate-script", { text, targetLang: target_language });
+        return textResult("Translated to " + target_language + " (" + text.length.toLocaleString() + " credits used" +
+          (data.remaining !== undefined ? ", " + Number(data.remaining).toLocaleString() + " remaining" : "") + "):\n\n" + data.translatedText);
+      } catch (e) { return textResult("Translation failed: " + e.message, true); }
+    });
+
+    server.registerTool("get_transactions", {
+      title: "Recent AudLabs transactions",
+      description: "Lists the user's recent credit top-ups and usage.",
+      inputSchema: { limit: z.number().int().min(1).max(50).optional().describe("How many to show (default 15)") }
+    }, async ({ limit }) => {
+      try {
+        const data = await callApi(uid, "get", "/api/transactions");
+        const list = (data.transactions || []).slice(0, limit || 15);
+        if (!list.length) return textResult("No transactions yet.");
+        return textResult(list.map(function (t) {
+          const sign = t.type === "credit" ? "+" : "-";
+          return (t.createdAt ? fmtDate(new Date(t.createdAt)) : "") + "  " + sign + Math.abs(t.amount || 0).toLocaleString() + "  " + (t.note || "");
+        }).join("\n"));
+      } catch (e) { return textResult("Could not load transactions: " + e.message, true); }
+    });
+
+    server.registerTool("get_affiliate_info", {
+      title: "AudLabs affiliate earnings",
+      description: "Shows the user's AudLabs affiliate (referral) code, commission rate, earnings and recent referrals. Withdrawals can only be made in the AudLabs app.",
+      inputSchema: {}
+    }, async () => {
+      const c = await availableCredits(uid);
+      if (!c.data) return textResult("No AudLabs account found for this user.", true);
+      const d = c.data;
+      const lines = [
+        "Referral code: " + (d.referralCode || "—"),
+        "Commission rate: " + (d.referralRate || 10) + "% lifetime",
+        "People referred: " + (d.referralCount || 0),
+        "Earnings available: ₦" + (d.referralEarningsNGN || 0).toLocaleString(),
+        "Your referral link and withdrawals are in the Affiliate Program tab: https://app.audlabs.io/refer-earn"
+      ];
+      try {
+        const r = await callApi(uid, "get", "/api/my-referrals");
+        const recent = (r.referrals || []).slice(0, 10);
+        if (recent.length) {
+          lines.push("", "Recent referrals:");
+          recent.forEach(function (x) { lines.push("• " + x.firstName + " (" + x.country + ")" + (x.signedUpAt ? ", joined " + fmtDate(new Date(x.signedUpAt)) : "")); });
+        }
+      } catch (e) {}
+      return textResult(lines.join("\n"));
+    });
+
+    server.registerTool("search_stock_videos", {
+      title: "Search stock video clips",
+      description: "Searches HD stock video clips by keywords. Searching is free; downloading costs " + CLIP_COST.toLocaleString() + " credits per clip (use download_stock_clips). For a full script, split it into sections and search each section with specific keywords, including place names where relevant (for example 'Marrakech medina market').",
+      inputSchema: {
+        keywords: z.string().min(1).max(100).describe("What the footage should show, 1-6 words"),
+        orientation: z.enum(["landscape", "portrait", "square"]).optional().describe("landscape for YouTube (default), portrait for Shorts/Reels"),
+        duration: z.enum(["any", "1-5s", "5-10s", "10-20s", "20s+"]).optional(),
+        count: z.number().int().min(1).max(15).optional().describe("How many clips to return (default 8)")
+      }
+    }, async ({ keywords, orientation, duration, count }) => {
+      const params = { query: keywords, per_page: count || 8, orientation: orientation || "landscape" };
+      if (duration === "1-5s") { params.min_duration = 1; params.max_duration = 5; }
+      else if (duration === "5-10s") { params.min_duration = 5; params.max_duration = 10; }
+      else if (duration === "10-20s") { params.min_duration = 10; params.max_duration = 20; }
+      else if (duration === "20s+") { params.min_duration = 20; }
+      try {
+        const r = await http.get("https://api.pexels.com/videos/search", { headers: { Authorization: process.env.PEXELS_API_KEY }, params, timeout: 30000 });
+        const vids = r.data.videos || [];
+        if (!vids.length) return textResult("No clips found for \"" + keywords + "\". Try different or more specific keywords.");
+        return textResult("Clips for \"" + keywords + "\" (download with download_stock_clips using the clip_id):\n" +
+          vids.map(function (v) { return "clip_id " + v.id + " · " + v.duration + "s · " + v.width + "x" + v.height + " · by " + ((v.user && v.user.name) || "unknown"); }).join("\n"));
+      } catch (e) { return textResult("Clip search failed. Please try again.", true); }
+    });
+
+    server.registerTool("download_stock_clips", {
+      title: "Download stock video clips",
+      description: "Downloads up to " + MAX_CLIPS_PER_CALL + " stock clips by clip_id and returns download links that work for 48 hours. Costs " + CLIP_COST.toLocaleString() + " credits per clip, capped at " + ALL_CLIPS_COST.toLocaleString() + " credits per request. Larger clips can take a minute.",
+      inputSchema: {
+        clip_ids: z.array(z.number().int()).min(1).max(MAX_CLIPS_PER_CALL),
+        quality: z.enum(["hd", "4k"]).optional().describe("hd (default) or 4k when available")
+      }
+    }, async ({ clip_ids, quality }) => {
+      const ids = Array.from(new Set(clip_ids));
+      const useAll = ids.length * CLIP_COST >= ALL_CLIPS_COST;
+      const totalCost = useAll ? ALL_CLIPS_COST : ids.length * CLIP_COST;
+      const c = await availableCredits(uid);
+      if (!c.team && c.total < totalCost) return textResult("Not enough credits. This needs " + totalCost.toLocaleString() + " credits and you have " + c.total.toLocaleString() + ". Top up: https://app.audlabs.io/buy-credits", true);
+      const stored = [];
+      for (const id of ids) {
+        try {
+          const info = await http.get("https://api.pexels.com/videos/videos/" + id, { headers: { Authorization: process.env.PEXELS_API_KEY }, timeout: 30000 });
+          const files = info.data.video_files || [];
+          const file = (quality === "4k" && files.find(function (f) { return f.width >= 3840; })) || files.find(function (f) { return f.quality === "hd"; }) || files[0];
+          if (!file) throw new Error("no file");
+          const bin = await http.get(file.link, { responseType: "arraybuffer", timeout: 120000, maxContentLength: 400 * 1024 * 1024 });
+          const s = await storeFileForUser(uid, Buffer.from(bin.data), "video/mp4", "mp4", "mcp-clips", "audlabs_clip_" + id + ".mp4");
+          stored.push({ id, url: s.url, filename: s.filename, res: (file.width || "") + "x" + (file.height || "") });
+        } catch (e) {
+          console.error("MCP clip download error:", id, e.message);
+        }
+      }
+      if (!stored.length) return textResult("Could not download those clips. Please check the clip_ids and try again. No credits were used.", true);
+      let paid = stored;
+      let note = "";
+      const finalAll = stored.length * CLIP_COST >= ALL_CLIPS_COST;
+      if (finalAll) {
+        try { await callApi(uid, "post", "/api/deduct-clip-credits", { type: "all" }); }
+        catch (e) { for (const f of stored) await deleteStoredFile(f.filename); return textResult("Download failed: " + e.message + " No credits were used.", true); }
+      } else {
+        paid = [];
+        for (const f of stored) {
+          try { await callApi(uid, "post", "/api/deduct-clip-credits", { type: "single" }); paid.push(f); }
+          catch (e) { await deleteStoredFile(f.filename); note = "\nSome clips were not delivered and not charged: " + e.message; }
+        }
+        if (!paid.length) return textResult("Download failed: " + note.replace("\nSome clips were not delivered and not charged: ", "") + " No credits were used.", true);
+      }
+      const cost = finalAll ? ALL_CLIPS_COST : paid.length * CLIP_COST;
+      const skipped = ids.length - stored.length;
+      return textResult("Your clips are ready (" + cost.toLocaleString() + " credits used). Links work for 48 hours:\n" +
+        paid.map(function (f) { return "clip " + f.id + " (" + f.res + "): " + f.url; }).join("\n") +
+        (skipped ? "\n" + skipped + " clip(s) could not be downloaded and were not charged." : "") + note);
+    });
+
+    server.registerTool("search_music", {
+      title: "Find background music",
+      description: "Searches royalty-free (CC0) background music and sounds by keyword or mood. Searching is free; downloading costs " + MUSIC_COST.toLocaleString() + " credits per track (use download_music).",
+      inputSchema: {
+        keywords: z.string().min(1).max(100).describe("Mood or style, for example 'cinematic travel' or 'calm piano'"),
+        duration: z.enum(["any", "under 30s", "30s-1min", "1-3min", "3min+"]).optional()
+      }
+    }, async ({ keywords, duration }) => {
+      const ranges = { "any": [0, 600], "under 30s": [0, 30], "30s-1min": [30, 60], "1-3min": [60, 180], "3min+": [180, 600] };
+      const rg = ranges[duration || "any"];
+      try {
+        const data = await callApi(uid, "post", "/api/music-finder", { query: keywords, minDuration: rg[0], maxDuration: rg[1] });
+        const list = data.results || [];
+        if (!list.length) return textResult("No tracks found for \"" + keywords + "\". Try a different keyword or mood.");
+        return textResult("Tracks for \"" + keywords + "\" (download with download_music using the track_id):\n" +
+          list.map(function (t) { const m = Math.floor(t.duration / 60), s2 = t.duration % 60; return "track_id " + t.id + " · " + t.name + " · " + m + ":" + (s2 < 10 ? "0" : "") + s2 + " · by " + t.username; }).join("\n"));
+      } catch (e) { return textResult("Music search failed: " + e.message, true); }
+    });
+
+    server.registerTool("download_music", {
+      title: "Download a music track",
+      description: "Downloads one royalty-free track by track_id and returns a download link that works for 48 hours. Costs " + MUSIC_COST.toLocaleString() + " credits.",
+      inputSchema: { track_id: z.number().int() }
+    }, async ({ track_id }) => {
+      const c = await availableCredits(uid);
+      if (!c.team && c.total < MUSIC_COST) return textResult("Not enough credits. A track costs " + MUSIC_COST.toLocaleString() + " credits and you have " + c.total.toLocaleString() + ". Top up: https://app.audlabs.io/buy-credits", true);
+      let stored;
+      try {
+        const info = await http.get("https://freesound.org/apiv2/sounds/" + track_id + "/", { params: { token: process.env.FREESOUND_API_KEY, fields: "id,name,previews,license" }, timeout: 30000 });
+        if (!/creativecommons\.org\/publicdomain\/zero/i.test(info.data.license || "") && !/Creative Commons 0/i.test(info.data.license || "")) {
+          return textResult("That track is not CC0-licensed, so AudLabs can't provide it. Please pick another track from search_music.", true);
+        }
+        const prev = info.data.previews || {};
+        const link = prev["preview-hq-mp3"] || prev["preview-lq-mp3"];
+        if (!link) throw new Error("no audio");
+        const bin = await http.get(link, { responseType: "arraybuffer", timeout: 60000 });
+        const safeName = String(info.data.name || "track").replace(/[^a-z0-9]+/gi, "_").slice(0, 40);
+        stored = await storeFileForUser(uid, Buffer.from(bin.data), "audio/mpeg", "mp3", "mcp-music", "audlabs_" + safeName + ".mp3");
+      } catch (e) {
+        console.error("MCP music download error:", e.message);
+        return textResult("Could not download that track. No credits were used.", true);
+      }
+      try {
+        const d = await callApi(uid, "post", "/api/deduct-music-credits", {});
+        return textResult("Your track is ready (" + MUSIC_COST.toLocaleString() + " credits used" + (d.remaining !== undefined && d.remaining < 999999999 ? ", " + Number(d.remaining).toLocaleString() + " remaining" : "") + "). Link works for 48 hours:\n" + stored.url);
+      } catch (e) {
+        await deleteStoredFile(stored.filename);
+        return textResult("Download failed: " + e.message + " No credits were used.", true);
+      }
     });
 
     return server;
