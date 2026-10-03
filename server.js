@@ -1209,7 +1209,8 @@ app.post("/api/translate-script", async (req,res) => {
       let monthlyCreditsTr = userDoc.data()?.monthlyCredits || 0;
       const monthlyExpiresAtTr = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
       if(monthlyExpiresAtTr && monthlyExpiresAtTr < new Date()) monthlyCreditsTr = 0;
-      const individualCredits = legacyCreditsTr + monthlyCreditsTr;
+            const freeExpTr = userDoc.data()?.freeMonthlyCreditsExpiresAt ? userDoc.data().freeMonthlyCreditsExpiresAt.toDate() : null;
+      const individualCredits = legacyCreditsTr + monthlyCreditsTr + ((freeExpTr && freeExpTr > new Date()) ? (userDoc.data()?.freeMonthlyCredits || 0) : 0);
       if(!user.email_verified){
         return res.status(403).json({ error:"Please verify your email address before using this feature." });
       }
@@ -2014,7 +2015,8 @@ app.post("/api/clone-voice", async (req,res) => {
         let monthlyCreditsClone = userDoc.data()?.monthlyCredits || 0;
         const monthlyExpiresAtClone = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
         if(monthlyExpiresAtClone && monthlyExpiresAtClone < new Date()) monthlyCreditsClone = 0;
-        const currentCredits = legacyCreditsClone + monthlyCreditsClone;
+                const freeExpClone = userDoc.data()?.freeMonthlyCreditsExpiresAt ? userDoc.data().freeMonthlyCreditsExpiresAt.toDate() : null;
+        const currentCredits = legacyCreditsClone + monthlyCreditsClone + ((freeExpClone && freeExpClone > new Date()) ? (userDoc.data()?.freeMonthlyCredits || 0) : 0);
         const teamId = userDoc.data()?.teamId;
         let hasTeamCredits = false;
         if(teamId){
@@ -2151,10 +2153,8 @@ app.post("/api/clone-voice", async (req,res) => {
         }
 
         // Deduct credits
-        if(!hasTeamCredits){
-          await db.collection("users").doc(user.uid).update({
-            credits: admin.firestore.FieldValue.increment(-15000)
-          });
+                if(!hasTeamCredits){
+          await deductUserCredits(user.uid, 15000);
         }
 
         // Save to Firestore
@@ -2715,7 +2715,8 @@ app.post("/api/generate-voice", async (req,res) => {
       let monthlyCredits = userDoc.data()?.monthlyCredits || 0;
       const monthlyExpiresAt = userDoc.data()?.monthlyCreditsExpiresAt ? userDoc.data().monthlyCreditsExpiresAt.toDate() : null;
       if(monthlyExpiresAt && monthlyExpiresAt < new Date()) monthlyCredits = 0;
-      const individualCredits = legacyCredits + monthlyCredits;
+            const freeExpGen = userDoc.data()?.freeMonthlyCreditsExpiresAt ? userDoc.data().freeMonthlyCreditsExpiresAt.toDate() : null;
+      const individualCredits = legacyCredits + monthlyCredits + ((freeExpGen && freeExpGen > new Date()) ? (userDoc.data()?.freeMonthlyCredits || 0) : 0);
       const cost = text.length;
       if(!user.email_verified){
         return res.status(403).json({ error:"Please verify your email address before generating. Check your inbox for the verification link." });
