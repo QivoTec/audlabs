@@ -3335,6 +3335,10 @@ app.get("/__/auth/action", (req,res) => {
 app.get("/privacy-policy", (req,res) => {
   res.sendFile(path.join(__dirname, "public", "privacy.html"));
 });
+app.get("/favicon.ico", (req,res) => {
+  res.set("Cache-Control", "public, max-age=86400");
+  res.sendFile(path.join(__dirname, "public", "logo-icon.png"));
+});
 app.get("/seyi", (req,res) => {
   res.sendFile(path.join(__dirname, "public", "seyi.html"));
 });
