@@ -6548,6 +6548,8 @@ app.all("/api/monthly-credits", async (req,res) => {
 
 
 
+require("./mcp")(app, { db, admin, uploadAudioToStorage });
+
 const PORT = process.env.PORT || 3000;
 app.get("*", (req,res) => {
   res.sendFile(path.join(__dirname, "public", "app.html"));

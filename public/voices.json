@@ -1,0 +1,1353 @@
+[
+ {
+  "id": "moss_audio_3efb9e96-6e80-11f1-b3de-deb486b97a4e",
+  "name": "Brian",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_CaptivatingStoryteller",
+  "name": "Booker",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_Trustworth_Man",
+  "name": "Allan",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_Gentle-voiced_man",
+  "name": "John",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_MatureBoss",
+  "name": "Edna",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "English_CalmWoman",
+  "name": "Gallegos",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "English_captivating_female1",
+  "name": "Myrtle",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "English_Friendly_Female_3",
+  "name": "Deana",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "English_engaging_instructor_vv2",
+  "name": "Driskill",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_expressive_host__vv1",
+  "name": "Maddox",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_causual_podcast_vv1",
+  "name": "Evans",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "Eglish_horror_movie_narrator_vv1",
+  "name": "Jerry",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_cedfd4d2-736d-11f0-99be-fe40dd2a5fe8",
+  "name": "Shell",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_00b1d233-6182-11f1-88bd-f6b1c9bf6181",
+  "name": "Jackson",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_Aussie_Bloke",
+  "name": "Aussie Bloke",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_c7f7edbb-6e87-11f1-8fdf-22f27a8feaff",
+  "name": "Adam",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_radiant_girl",
+  "name": "Andrea",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "English_Upbeat_Woman",
+  "name": "Priscilla",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "English_nursery_teacher_vv2",
+  "name": "Faith",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "English_instructive_professor_vv1",
+  "name": "Helen",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_6dc281eb-713c-11f0-a447-9613c873494c",
+  "name": "Diana",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_076697ad-7144-11f0-a447-9613c873494c",
+  "name": "Joel",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "movie_trailer_deep",
+  "name": "Austin",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_Insightful_Speaker",
+  "name": "Alfred",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_Lively_Male_11",
+  "name": "William",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_FriendlyPerson",
+  "name": "Aaron",
+  "meta": "Male · English",
+  "gender": "male",
+  "lang": "en"
+ },
+ {
+  "id": "English_Steady_Female_1",
+  "name": "Lillian",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_7c7e7ae2-7356-11f0-9540-7ef9b4b62566",
+  "name": "Celia",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_62ca20b0-7380-11f0-99be-fe40dd2a5fe8",
+  "name": "Nancy",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "socialmedia_female_1_v1",
+  "name": "Eleanor",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "moss_audio_c12a59b9-7115-11f0-a447-9613c873494c",
+  "name": "Julie",
+  "meta": "Female · English",
+  "gender": "female",
+  "lang": "en"
+ },
+ {
+  "id": "Afrikaans_male_1_v1",
+  "name": "Pieter",
+  "meta": "Male · Afrikaans",
+  "gender": "male",
+  "lang": "af"
+ },
+ {
+  "id": "Afrikaans_female_1_v1",
+  "name": "Annelie",
+  "meta": "Female · Afrikaans",
+  "gender": "female",
+  "lang": "af"
+ },
+ {
+  "id": "German_FriendlyMan",
+  "name": "Felix",
+  "meta": "Male · German",
+  "gender": "male",
+  "lang": "de"
+ },
+ {
+  "id": "German_PlayfulMan",
+  "name": "Leon",
+  "meta": "Male · German",
+  "gender": "male",
+  "lang": "de"
+ },
+ {
+  "id": "German_SweetLady",
+  "name": "Sophie",
+  "meta": "Female · German",
+  "gender": "female",
+  "lang": "de"
+ },
+ {
+  "id": "Italian_Narrator",
+  "name": "Lorenzo",
+  "meta": "Male · Italian",
+  "gender": "male",
+  "lang": "it"
+ },
+ {
+  "id": "Italian_ReliableMan",
+  "name": "Matteo",
+  "meta": "Male · Italian",
+  "gender": "male",
+  "lang": "it"
+ },
+ {
+  "id": "Italian_AthleticStudent",
+  "name": "Marco",
+  "meta": "Male · Italian",
+  "gender": "male",
+  "lang": "it"
+ },
+ {
+  "id": "Italian_BraveHeroine",
+  "name": "Valentina",
+  "meta": "Female · Italian",
+  "gender": "female",
+  "lang": "it"
+ },
+ {
+  "id": "Italian_WanderingSorcerer",
+  "name": "Elena",
+  "meta": "Female · Italian",
+  "gender": "female",
+  "lang": "it"
+ },
+ {
+  "id": "Italian_DiligentLeader",
+  "name": "Lucia",
+  "meta": "Female · Italian",
+  "gender": "female",
+  "lang": "it"
+ },
+ {
+  "id": "Italian_ArrogantPrincess",
+  "name": "Bianca",
+  "meta": "Female · Italian",
+  "gender": "female",
+  "lang": "it"
+ },
+ {
+  "id": "Russian_Engaging_Historian_v1",
+  "name": "Alexander",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Philosophical_Narrator_v1",
+  "name": "Ivan",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Overwhelmed_Vlogger_v1",
+  "name": "Mikhail",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Articulate_Tutor_v1",
+  "name": "Sergei",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Thoughtful_Analyst_v1",
+  "name": "Andrei",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Theatrical_Narrator_v1",
+  "name": "Alexei",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Heroic_Warrior_v1",
+  "name": "Pavel",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Professional_Broadcaster_v2",
+  "name": "Yuri",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Rugged_Storyteller_v1",
+  "name": "Viktor",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Serious_Journalist_v3",
+  "name": "Oleg",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Energetic_Streamer_v1",
+  "name": "Igor",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_HandsomeChildhoodFriend",
+  "name": "Artem",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_ReliableMan",
+  "name": "Roman",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_AttractiveGuy",
+  "name": "Denis",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Bad-temperedBoy",
+  "name": "Vladimir",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Energetic_Boy_v2",
+  "name": "Nikolai",
+  "meta": "Male · Russian",
+  "gender": "male",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Gentle_Storyteller_v3",
+  "name": "Maria",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Dramatic_Speaker_v1",
+  "name": "Anna",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Engaging_Podcaster_v1",
+  "name": "Irina",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Spirited_Narrator_v1",
+  "name": "Yulia",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Energetic_Tutor_v1",
+  "name": "Alina",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Wise_Mentor_v1",
+  "name": "Vera",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Energetic_Reporter_v2",
+  "name": "Daria",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_Spirited_Schoolgirl_v1",
+  "name": "Olga",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_BrightHeroine",
+  "name": "Ludmila",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_AmbitiousWoman",
+  "name": "Natalia",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_CrazyQueen",
+  "name": "Valeria",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Russian_PessimisticGirl",
+  "name": "Vera II",
+  "meta": "Female · Russian",
+  "gender": "female",
+  "lang": "ru"
+ },
+ {
+  "id": "Portuguese_BR_Engaging_Historian_v1",
+  "name": "Gabriel",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Philosophical_Narrator_v1",
+  "name": "Rafael",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Overwhelmed_Vlogger_v1",
+  "name": "Lucas",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Articulate_Tutor_v1",
+  "name": "Mateus",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Thoughtful_Analyst_v1",
+  "name": "Pedro",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Theatrical_Narrator_v1",
+  "name": "Henrique",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Heroic_Warrior_v1",
+  "name": "Eduardo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Professional_Broadcaster_v2",
+  "name": "Bruno",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Rugged_Storyteller_v1",
+  "name": "Thiago",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Serious_Journalist_v3",
+  "name": "Gustavo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Streamer_v1",
+  "name": "Felipe",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Gentle_Storyteller_v3",
+  "name": "Diego",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Dramatic_Speaker_v1",
+  "name": "Vinicius",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Engaging_Podcaster_v1",
+  "name": "Rodrigo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Spirited_Narrator_v1",
+  "name": "Caio",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Tutor_v1",
+  "name": "Leandro",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Wise_Mentor_v1",
+  "name": "Marcelo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Reporter_v2",
+  "name": "Andre",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Spirited_Schoolgirl_v1",
+  "name": "Fabio",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Engaging_Historian_v2",
+  "name": "Renato",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Philosophical_Narrator_v2",
+  "name": "Sergio",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Overwhelmed_Vlogger_v2",
+  "name": "Marcos",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Articulate_Tutor_v2",
+  "name": "Leonardo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Thoughtful_Analyst_v2",
+  "name": "Alexandre",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Theatrical_Narrator_v2",
+  "name": "Antonio",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Heroic_Warrior_v2",
+  "name": "Carlos",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Professional_Broadcaster_v3",
+  "name": "Daniel",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Rugged_Storyteller_v2",
+  "name": "Fernando",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Serious_Journalist_v4",
+  "name": "Jose",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Streamer_v2",
+  "name": "Paulo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Gentle_Storyteller_v4",
+  "name": "Roberto",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Dramatic_Speaker_v2",
+  "name": "Ricardo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Engaging_Podcaster_v2",
+  "name": "Victor",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Spirited_Narrator_v2",
+  "name": "Wanderson",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Tutor_v2",
+  "name": "Guilherme",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Wise_Mentor_v2",
+  "name": "Claudio",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Reporter_v3",
+  "name": "Cristiano",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Spirited_Schoolgirl_v2",
+  "name": "Danilo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Engaging_Historian_v3",
+  "name": "Edilson",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Philosophical_Narrator_v3",
+  "name": "Emerson",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Overwhelmed_Vlogger_v3",
+  "name": "Evandro",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Articulate_Tutor_v3",
+  "name": "Flavio",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Thoughtful_Analyst_v3",
+  "name": "Geovani",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Theatrical_Narrator_v3",
+  "name": "Gilberto",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Heroic_Warrior_v3",
+  "name": "Heitor",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Professional_Broadcaster_v4",
+  "name": "Hugo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Rugged_Storyteller_v3",
+  "name": "Iago",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Serious_Journalist_v5",
+  "name": "Icaro",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Streamer_v3",
+  "name": "Italo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Gentle_Storyteller_v5",
+  "name": "Jadson",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Dramatic_Speaker_v3",
+  "name": "Jairo",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Engaging_Podcaster_v3",
+  "name": "Janio",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Spirited_Narrator_v3",
+  "name": "Jeferson",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Energetic_Tutor_v3",
+  "name": "Jessé",
+  "meta": "Male · Portuguese",
+  "gender": "male",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Gentle_Storyteller_v1",
+  "name": "Ana",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Dramatic_Speaker_v1",
+  "name": "Beatriz",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Engaging_Podcaster_v1",
+  "name": "Camila",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Spirited_Narrator_v1",
+  "name": "Carolina",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Tutor_v1",
+  "name": "Fernanda",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Wise_Mentor_v1",
+  "name": "Gabriela",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Reporter_v1",
+  "name": "Isabella",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Spirited_Schoolgirl_v1",
+  "name": "Julia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Engaging_Historian_v1",
+  "name": "Laura",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Philosophical_Narrator_v1",
+  "name": "Leticia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Overwhelmed_Vlogger_v1",
+  "name": "Livia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Articulate_Tutor_v1",
+  "name": "Lucia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Thoughtful_Analyst_v1",
+  "name": "Luisa",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Theatrical_Narrator_v1",
+  "name": "Mariana",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Heroic_Warrior_v1",
+  "name": "Natalia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Professional_Broadcaster_v1",
+  "name": "Patricia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Rugged_Storyteller_v1",
+  "name": "Rafaela",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Serious_Journalist_v1",
+  "name": "Renata",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Streamer_v1",
+  "name": "Sabrina",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Gentle_Storyteller_v2",
+  "name": "Silvia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Dramatic_Speaker_v2",
+  "name": "Simone",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Engaging_Podcaster_v2",
+  "name": "Tatiane",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Spirited_Narrator_v2",
+  "name": "Thais",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Tutor_v2",
+  "name": "Vanessa",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Wise_Mentor_v2",
+  "name": "Veronica",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Reporter_v2",
+  "name": "Viviane",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Spirited_Schoolgirl_v2",
+  "name": "Yasmin",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Engaging_Historian_v2",
+  "name": "Yolanda",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Philosophical_Narrator_v2",
+  "name": "Zuleide",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Overwhelmed_Vlogger_v2",
+  "name": "Adriana",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Articulate_Tutor_v2",
+  "name": "Alessandra",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Thoughtful_Analyst_v2",
+  "name": "Aline",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Theatrical_Narrator_v2",
+  "name": "Amanda",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Heroic_Warrior_v2",
+  "name": "Andreia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Professional_Broadcaster_v2",
+  "name": "Angela",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Rugged_Storyteller_v2",
+  "name": "Bruna",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Serious_Journalist_v2",
+  "name": "Claudia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Streamer_v2",
+  "name": "Cristina",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Gentle_Storyteller_v3",
+  "name": "Debora",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Dramatic_Speaker_v3",
+  "name": "Denise",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Engaging_Podcaster_v3",
+  "name": "Edilaine",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Spirited_Narrator_v3",
+  "name": "Elaine",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Tutor_v3",
+  "name": "Erica",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Wise_Mentor_v3",
+  "name": "Fatima",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Energetic_Reporter_v3",
+  "name": "Flavia",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Spirited_Schoolgirl_v3",
+  "name": "Gislaine",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Engaging_Historian_v3",
+  "name": "Iara",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Portuguese_BR_Female_Philosophical_Narrator_v3",
+  "name": "Ilana",
+  "meta": "Female · Portuguese",
+  "gender": "female",
+  "lang": "pt"
+ },
+ {
+  "id": "Ukrainian_WiseScholar",
+  "name": "Taras",
+  "meta": "Male · Ukrainian",
+  "gender": "male",
+  "lang": "uk"
+ },
+ {
+  "id": "Ukrainian_CalmWoman",
+  "name": "Vika",
+  "meta": "Female · Ukrainian",
+  "gender": "female",
+  "lang": "uk"
+ },
+ {
+  "id": "French_Male_Speech_New",
+  "name": "Level-Headed Man",
+  "meta": "Male · French",
+  "gender": "male",
+  "lang": "fr"
+ },
+ {
+  "id": "French_CasualMan",
+  "name": "Casual Man",
+  "meta": "Male · French",
+  "gender": "male",
+  "lang": "fr"
+ },
+ {
+  "id": "French_MaleNarrator",
+  "name": "Male Narrator",
+  "meta": "Male · French",
+  "gender": "male",
+  "lang": "fr"
+ },
+ {
+  "id": "French_Female_News Anchor",
+  "name": "Patient Female Presenter",
+  "meta": "Female · French",
+  "gender": "female",
+  "lang": "fr"
+ },
+ {
+  "id": "French_MovieLeadFemale",
+  "name": "Movie Lead Female",
+  "meta": "Female · French",
+  "gender": "female",
+  "lang": "fr"
+ },
+ {
+  "id": "French_FemaleAnchor",
+  "name": "Female Anchor",
+  "meta": "Female · French",
+  "gender": "female",
+  "lang": "fr"
+ },
+ {
+  "id": "French_Female Journalist",
+  "name": "Fluent Female",
+  "meta": "Female · French",
+  "gender": "female",
+  "lang": "fr"
+ },
+ {
+  "id": "French_Female_Speech_New",
+  "name": "Persuasive Female",
+  "meta": "Female · French",
+  "gender": "female",
+  "lang": "fr"
+ },
+ {
+  "id": "Spanish_MaturePartner",
+  "name": "Mature Partner",
+  "meta": "Male · Spanish",
+  "gender": "male",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_CaptivatingStoryteller",
+  "name": "Captivating Storyteller",
+  "meta": "Male · Spanish",
+  "gender": "male",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_BossyLeader",
+  "name": "Bossy Leader",
+  "meta": "Male · Spanish",
+  "gender": "male",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_RationalMan",
+  "name": "Rational Man",
+  "meta": "Male · Spanish",
+  "gender": "male",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_Deep-tonedMan",
+  "name": "Deep-toned Man",
+  "meta": "Male · Spanish",
+  "gender": "male",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_DeterminedManager",
+  "name": "Determined Manager",
+  "meta": "Female · Spanish",
+  "gender": "female",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_SophisticatedLady",
+  "name": "Sophisticated Lady",
+  "meta": "Female · Spanish",
+  "gender": "female",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_Fussyhostess",
+  "name": "Fussy Hostess",
+  "meta": "Female · Spanish",
+  "gender": "female",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_FrankLady",
+  "name": "Frank Lady",
+  "meta": "Female · Spanish",
+  "gender": "female",
+  "lang": "es"
+ },
+ {
+  "id": "Spanish_ToughBoss",
+  "name": "Tough Boss",
+  "meta": "Female · Spanish",
+  "gender": "female",
+  "lang": "es"
+ }
+]

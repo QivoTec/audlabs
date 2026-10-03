@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in with AudLabs</title>
+<link rel="icon" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#030E2E;color:#1a1a1a;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#fff;border-radius:16px;padding:36px 28px;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+.logo{width:56px;height:56px;object-fit:contain;margin:0 auto 12px;display:block;}
+h1{font-size:20px;font-weight:700;margin-bottom:6px;}
+.sub{font-size:13px;color:#888;line-height:1.6;margin-bottom:22px;}
+.btn{width:100%;padding:13px 18px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px;border:none;}
+.btn-google{background:#fff;border:1.5px solid #e0e0e0;color:#1a1a1a;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-dark{background:#1a1a1a;color:#fff;}
+.btn-gold{background:linear-gradient(180deg,#e8c97a 0%,#c9a84c 45%,#b8934a 100%);color:#111;font-weight:700;}
+.btn-plain{background:transparent;color:#999;font-weight:500;}
+.inp{width:100%;padding:12px 14px;border:1.5px solid #ebebeb;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;margin-bottom:10px;background:#fafafa;outline:none;}
+.inp:focus{border-color:#c9a84c;}
+.or{font-size:12px;color:#bbb;margin:6px 0 14px;}
+.status{font-size:13px;margin-top:8px;min-height:18px;}
+.err{color:#e74c3c;}
+.ok{color:#27ae60;}
+.perm{text-align:left;background:#fffdf7;border:1.5px solid #f0e5c0;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:#555;line-height:1.7;}
+.perm b{color:#1a1a1a;}
+.who{font-size:12px;color:#888;margin-bottom:14px;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <img class="logo" src="/logo.png" alt="AudLabs">
+
+  <div id="step-loading"><h1>Loading…</h1></div>
+
+  <div id="step-invalid" class="hidden">
+    <h1>This link has expired</h1>
+    <p class="sub">Please go back to your AI app and connect AudLabs again.</p>
+  </div>
+
+  <div id="step-signin" class="hidden">
+    <h1>Sign in with AudLabs</h1>
+    <p class="sub"><b id="client-name-1">An AI app</b> wants to connect to your AudLabs account.</p>
+    <button class="btn btn-google" onclick="signInGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 38.2 44 33 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+    <div class="or">or sign in with email</div>
+    <input class="inp" id="email" type="email" placeholder="Email address" autocomplete="email">
+    <input class="inp" id="password" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')signInEmail()">
+    <button class="btn btn-dark" onclick="signInEmail()">Sign in</button>
+    <div class="status err" id="signin-status"></div>
+  </div>
+
+  <div id="step-consent" class="hidden">
+    <h1>Allow access?</h1>
+    <p class="who">Signed in as <b id="user-email"></b></p>
+    <div class="perm">
+      <b id="client-name-2">An AI app</b> will be able to:<br>
+      • Generate voiceovers using your AudLabs credits<br>
+      • See your voices and your credit balance<br><br>
+      It will <b>not</b> be able to buy credits or withdraw your earnings.
+    </div>
+    <button class="btn btn-gold" onclick="decide('allow')">Allow</button>
+    <button class="btn btn-plain" onclick="decide('deny')">Cancel</button>
+    <div class="status" id="consent-status"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({apiKey:"AIzaSyCJ12GtdhXTzfB0h0buHkjzsqZtRxzfxS8",authDomain:"voicegene.firebaseapp.com",projectId:"voicegene",storageBucket:"voicegene.firebasestorage.app",messagingSenderId:"1040481136250",appId:"1:1040481136250:web:7a47e5993510d3ac07d5c3"});
+var auth = firebase.auth();
+var reqId = new URLSearchParams(location.search).get("req");
+
+function show(id){
+  ["step-loading","step-invalid","step-signin","step-consent"].forEach(function(s){
+    document.getElementById(s).classList.toggle("hidden", s !== id);
+  });
+}
+
+async function init(){
+  if(!reqId){ show("step-invalid"); return; }
+  try {
+    var r = await fetch("/oauth/request-info?req=" + encodeURIComponent(reqId));
+    var info = await r.json();
+    if(!info.valid){ show("step-invalid"); return; }
+    document.getElementById("client-name-1").textContent = info.clientName;
+    document.getElementById("client-name-2").textContent = info.clientName;
+  } catch(e){ show("step-invalid"); return; }
+  try { await auth.getRedirectResult(); } catch(e){}
+  auth.onAuthStateChanged(function(u){
+    if(u && u.emailVerified){
+      document.getElementById("user-email").textContent = u.email;
+      show("step-consent");
+    } else if(u && !u.emailVerified){
+      document.getElementById("signin-status").textContent = "Please verify your email in the AudLabs app first, then try again.";
+      auth.signOut();
+      show("step-signin");
+    } else {
+      show("step-signin");
+    }
+  });
+}
+
+window.signInGoogle = async function(){
+  var p = new firebase.auth.GoogleAuthProvider();
+  try { await auth.signInWithPopup(p); }
+  catch(e){
+    if(e.code === "auth/popup-blocked" || e.code === "auth/cancelled-popup-request"){ auth.signInWithRedirect(p); }
+    else if(e.code !== "auth/popup-closed-by-user"){ document.getElementById("signin-status").textContent = "Sign-in failed. Please try again."; }
+  }
+};
+
+window.signInEmail = async function(){
+  var email = document.getElementById("email").value.trim();
+  var pw = document.getElementById("password").value;
+  var st = document.getElementById("signin-status");
+  if(!email || !pw){ st.textContent = "Please enter your email and password."; return; }
+  st.textContent = "";
+  try { await auth.signInWithEmailAndPassword(email, pw); }
+  catch(e){ st.textContent = "Incorrect email or password."; }
+};
+
+window.decide = async function(decision){
+  var st = document.getElementById("consent-status");
+  st.className = "status"; st.textContent = "Please wait…";
+  try {
+    var idToken = decision === "allow" && auth.currentUser ? await auth.currentUser.getIdToken(true) : null;
+    var r = await fetch("/oauth/approve", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ req: reqId, idToken: idToken, decision: decision })
+    });
+    var data = await r.json();
+    if(data.redirect){
+      st.className = "status ok";
+      st.textContent = decision === "allow" ? "Connected! Returning to your AI app…" : "Cancelled. Returning…";
+      window.location.href = data.redirect;
+    } else {
+      st.className = "status err"; st.textContent = data.error || "Something went wrong. Please try again.";
+    }
+  } catch(e){
+    st.className = "status err"; st.textContent = "Something went wrong. Please try again.";
+  }
+};
+
+init();
+</script>
+</body>
+</html>
