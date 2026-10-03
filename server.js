@@ -11,6 +11,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // ── BLOCK MALICIOUS REQUESTS ──
 app.use(function(req, res, next){
   var p = req.path.toLowerCase();
+  if(p === "/.well-known/oauth-authorization-server" || p.startsWith("/.well-known/oauth-protected-resource")) return next();
   if(
     p.startsWith("/.") ||
     p.startsWith("/.git") ||
