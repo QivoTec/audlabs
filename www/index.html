@@ -71,7 +71,7 @@
 #vg-vgrid-wrap{height:300px !important;}button[onclick="clearScript()"]{margin-left:0 !important;margin-top:10px !important;display:block !important;width:100% !important;}
 button[onclick="addPausesToScript()"]{display:block !important;width:100% !important;}
 }
-#vg.dark-mode #vg-big-credits{color:#f0ece0 !important;}#vg.dark-mode .vg-topbar{background:#111 !important;border-color:#222 !important;}#vg.dark-mode .vg-topbar-title{color:#f0ece0 !important;}#vg.dark-mode .vg-topbar-sub{color:#666 !important;}#vg.dark-mode .vg-theme-btn{color:#888 !important;background:linear-gradient(#1a1a1a,#1a1a1a) padding-box,conic-gradient(from var(--led-angle,0deg),#ff3b3b,#ff9d3b,#fff23b,#3bff5e,#3bd4ff,#3b5eff,#c93bff,#ff3b3b) border-box !important;border-color:transparent !important;}#vg.dark-mode .vg-sb-user{background:#1a1a1a !important;}#vg.dark-mode #vg-leaderboard-popup > div{background:#1e1e1e !important;}
+#vg.dark-mode #vg-big-credits,#vg.dark-mode .vg-big-credits-copy{color:#f0ece0 !important;}#vg.dark-mode .vg-topbar{background:#111 !important;border-color:#222 !important;}#vg.dark-mode .vg-topbar-title{color:#f0ece0 !important;}#vg.dark-mode .vg-topbar-sub{color:#666 !important;}#vg.dark-mode .vg-theme-btn{color:#888 !important;background:linear-gradient(#1a1a1a,#1a1a1a) padding-box,conic-gradient(from var(--led-angle,0deg),#ff3b3b,#ff9d3b,#fff23b,#3bff5e,#3bd4ff,#3b5eff,#c93bff,#ff3b3b) border-box !important;border-color:transparent !important;}#vg.dark-mode .vg-sb-user{background:#1a1a1a !important;}#vg.dark-mode #vg-leaderboard-popup > div{background:#1e1e1e !important;}
 #vg.dark-mode #vg-leaderboard-popup h2{color:#f0ece0 !important;}
 #vg.dark-mode #vg-leaderboard-popup > div > div:first-child{background:#1e1e1e !important;}
 </style><div id="vg"><!-- ══ LANDING ══ --><div id="vg-land" style="display:none;"><div class="vgl-card"><div class="vgl-icon"><img src="https://app.audlabs.io/logo.png" alt="AudLabs"></div><div class="vgl-brand">AudLabs</div><h1 class=vgl-title">Welcome Back,<br><span style="color:#c9a84c;">Creator.</span></h1><div style="width:100%;text-align:left;margin-bottom:8px;">
@@ -363,6 +363,7 @@ Share on X
 </div>
 <!-- TOPUP --><div id="vg-tc-topup" class="vg-tc"><div class="vg-card"><div class="vg-card-title"><span class="dot"></span>Your Credit Balance</div><div style="text-align:center;padding:20px 0;"><div style="font-size:48px;font-weight:700;color:#1a1a1a;" id="vg-big-credits">—</div><div style="font-size:13px;color:#999;margin-top:4px;">credits remaining</div><div style="font-size:12px;color:#bbb;margin-top:8px;">1 credit = 1 character</div><div id="vg-subscription-status-topup" style="font-size:13px;color:#888;margin-top:12px;padding-top:12px;border-top:1px solid #ebebeb;"></div></div></div><div class="vg-card"><div class="vg-card-title"><span class="dot"></span>Credit Packages — Bank Transfer (NGN)</div><div style="background:#fffdf7;border:1.5px solid #f0e5c0;border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px;color:#7a6230;">💡 Select a package, copy the exact Naira amount and transfer to your virtual account. Credits are added automatically.</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:16px;" id="topup-packages"><div class="topup-pkg" data-usd="32" data-credits="2600000" style="border:1.5px solid #ebebeb;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.15s;"><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Studio</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">2,600,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Monthly Credits</div><div class="topup-ngn-price" data-usd="32" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div><div class="topup-pkg" data-usd="24" data-credits="1900000" style="border:1.5px solid #ebebeb;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.15s;"><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Pro</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">1,900,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Monthly Credits</div><div class="topup-ngn-price" data-usd="24" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div><div class="topup-pkg sel-topup-pkg" data-usd="16" data-credits="1200000" style="border:2px solid #c9a84c;border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:#fffdf7;position:relative;"><div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#c9a84c;color:#111;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap;">MOST POPULAR</div><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Standard</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">1,200,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Monthly Credits</div><div class="topup-ngn-price" data-usd="16" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div><div class="topup-pkg" data-usd="8" data-credits="500000" style="border:1.5px solid #ebebeb;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.15s;"><div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px;">Starter</div><div style="font-size:22px;font-weight:700;color:#c9a84c;">500,000</div><div style="font-size:11px;color:#999;margin-bottom:6px;">Monthly Credits</div><div class="topup-ngn-price" data-usd="8" style="font-size:14px;font-weight:700;color:#1a1a1a;">Loading...</div></div><div id="topup-selected-box" style="background:#fff8e6;border:1.5px solid #f0d080;border-radius:10px;padding:16px;margin-bottom:16px;display:none;"><div style="font-size:12px;color:#888;margin-bottom:6px;">Transfer exactly this amount:</div><div style="display:flex;align-items:center;gap:10px;"><div id="topup-exact-amount" style="font-size:28px;font-weight:700;color:#c9a84c;flex:1;">—</div><button onclick="copyTopupAmount()" style="background:#1a1a1a;border:none;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">📋 Copy</button></div><div style="font-size:12px;color:#bbb;margin-top:4px;" id="topup-credits-label">— credits</div></div><div class="vg-card-title" style="margin-top:4px;"><span class="dot"></span>Your Virtual Account</div><div id="vg-va-list"><div style="text-align:center;color:#bbb;font-size:13px;padding:20px;">Loading your virtual account...</div></div><button onclick="refreshBalance()" style="background:#f5f5f5;border:1.5px solid #ebebeb;color:#555;padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;border-radius:8px;font-family:Inter,sans-serif;margin-top:12px;">↻ Refresh Balance</button></div></div></div>
 <div id="vg-tc-crypto" class="vg-tc" style="display:none;">
+<div class="vg-card"><div class="vg-card-title"><span class="dot"></span>Your Credit Balance</div><div style="text-align:center;padding:20px 0;"><div class="vg-big-credits-copy" style="font-size:48px;font-weight:700;color:#1a1a1a;">—</div><div style="font-size:13px;color:#999;margin-top:4px;">credits remaining</div><div style="font-size:12px;color:#bbb;margin-top:8px;">1 credit = 1 character</div><div class="vg-sub-status-copy" style="font-size:13px;color:#888;margin-top:12px;padding-top:12px;border-top:1px solid #ebebeb;"></div></div></div>
 <div class="vg-card">
 <div class="vg-card-title"><span class="dot"></span>Buy Credits with Crypto.</div>
 <div style="background:#f0f7ff;border:1.5px solid #cce0ff;border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px;color:#2c5aa0;">💡 Pay with USDT (TRC20) from anywhere. Min: $24 USDT</div>
@@ -373,6 +374,7 @@ Share on X
  </div></div><div style="display:flex;gap:10px;margin-top:12px;"><button onclick="checkCryptoStatus()" style="flex:1;background:#f5f5f5;border:1.5px solid #ebebeb;color:#555;padding:11px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">↻ Check Status</button><button onclick="cancelCryptoPayment()" style="flex:1;background:transparent;border:1.5px solid #ebebeb;color:#999;padding:11px;border-radius:8px;font-size:13px;cursor:pointer;">Cancel</button></div></div></div><!-- REFERRAL TAB -->
 
 <div id="vg-tc-card" class="vg-tc">
+<div class="vg-card"><div class="vg-card-title"><span class="dot"></span>Your Credit Balance</div><div style="text-align:center;padding:20px 0;"><div class="vg-big-credits-copy" style="font-size:48px;font-weight:700;color:#1a1a1a;">—</div><div style="font-size:13px;color:#999;margin-top:4px;">credits remaining</div><div style="font-size:12px;color:#bbb;margin-top:8px;">1 credit = 1 character</div><div class="vg-sub-status-copy" style="font-size:13px;color:#888;margin-top:12px;padding-top:12px;border-top:1px solid #ebebeb;"></div></div></div>
 <div class="vg-card">
 <div class="vg-card-title"><span class="dot"></span>Buy Credits with Card or Mobile Money.</div>
 <div style="background:#f0fff4;border:1.5px solid #b2f5c8;border-radius:8px;padding:10px;margin-bottom:16px;font-size:12px;color:#276749;">💳 Pay with Visa, Mastercard or any debit/credit card. Min: $8</div>
@@ -518,7 +520,7 @@ Share on X
 <div id="vg-tc-scriptvideos" class="vg-tc">
 <div class="vg-card">
 <div class="vg-card-title"><span class="dot"></span>Script To Videos</div>
-<div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Paste your script below and we will find matching HD video clips for every paragraph — completely free.</div>
+<div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.6;">Paste your script below and we will find matching HD video clips for every paragraph — completely free to search. Downloading a single clip costs 1,500 credits; downloading all clips at once costs 5,000 credits.</div>
 <div style="margin-bottom:14px;">
 <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Niche Presets</div>
 <div style="display:flex;flex-wrap:wrap;gap:8px;">
@@ -3282,17 +3284,31 @@ function renderSubscriptionStatus(data){
   var sidebarHtml, topupHtml;
   if(isActive){
     var dateLabel = expiresAt.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
-    sidebarHtml = '<span style="color:#c9a84c;font-weight:600;">Active</span> — expires '+dateLabel;
-    topupHtml = '<span style="color:#c9a84c;font-weight:600;">Subscription Active</span> — Monthly credits expire on <strong>'+dateLabel+'</strong>';
+        sidebarHtml = '<span style="color:#c9a84c;font-weight:600;">Active</span> — expires '+dateLabel+'<br><a href="#" onclick="switchToTopup();return false;" style="color:#c9a84c;font-weight:700;text-decoration:none;">Top up to extend →</a>';
+    topupHtml = '<span style="color:#c9a84c;font-weight:600;">Subscription Active</span> — Monthly credits expire on <strong>'+dateLabel+'</strong>.<br><span style="color:#c9a84c;font-weight:700;">Top up now and your unused credits roll over, with a fresh 30-day expiry.</span>';
   } else {
     sidebarHtml = '<span style="color:#999;font-weight:600;">No Active Subscription</span>';
     topupHtml = '<span style="color:#999;font-weight:600;">No Active Subscription</span>';
   }
   var statusEl = document.getElementById("vg-subscription-status");
   if(statusEl) statusEl.innerHTML = sidebarHtml;
-  var statusElTopup = document.getElementById("vg-subscription-status-topup");
+    var statusElTopup = document.getElementById("vg-subscription-status-topup");
   if(statusElTopup) statusElTopup.innerHTML = topupHtml;
 }
+(function(){
+  function syncBalanceCopies(){
+    var src = document.getElementById("vg-big-credits");
+    var srcStatus = document.getElementById("vg-subscription-status-topup");
+    document.querySelectorAll(".vg-big-credits-copy").forEach(function(el){ if(src) el.textContent = src.textContent; });
+    document.querySelectorAll(".vg-sub-status-copy").forEach(function(el){ if(srcStatus) el.innerHTML = srcStatus.innerHTML; });
+  }
+  var balanceObserver = new MutationObserver(syncBalanceCopies);
+  ["vg-big-credits","vg-subscription-status-topup"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) balanceObserver.observe(el, {childList:true, characterData:true, subtree:true});
+  });
+  syncBalanceCopies();
+})();
 
 // Card package selection
 var selectedCardPkg = {usd:6, credits:1000000};
@@ -5129,6 +5145,28 @@ window.downloadAllClips = async function(){
     showStatus("No clips to download.", "err");
     return;
   }
+  var ALL_CLIPS_COST = 5000;
+  if(userCredits < ALL_CLIPS_COST && !userTeamId){
+    showStatus("Not enough credits. You need "+ALL_CLIPS_COST.toLocaleString()+" credits to download all clips. Please top up.", "err");
+    return;
+  }
+  try {
+    var token = await getToken();
+    var deductRes = await fetch(BACKEND+"/api/deduct-clip-credits", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify({ type: "all" })
+    });
+    var deductData = await deductRes.json();
+    if(!deductRes.ok){
+      showStatus(deductData.error || "Failed to process download.", "err");
+      return;
+    }
+    if(deductData.remaining !== undefined){ userCredits = deductData.remaining; renderCreditsBar(); }
+  } catch(deductErr){
+    showStatus("Failed to process download: " + deductErr.message, "err");
+    return;
+  }
   var total = window.currentSvAllClips.length;
   var progressEl2 = document.getElementById("vg-zip-progress");
   if(!progressEl2){
@@ -5161,7 +5199,7 @@ window.downloadAllClips = async function(){
           data: base64data,
           directory: "DOCUMENTS"
         });
-        showStatus("Zip saved to your device! All "+total+" clips included.", "ok");
+                showStatus("Zip saved to your device! All "+total+" clips included. "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
         try {
           await Share.share({
             title: "Share your AudLabs video clips",
@@ -5179,7 +5217,7 @@ window.downloadAllClips = async function(){
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(a.href);
-      showStatus("All "+total+" clips downloaded as a zip file!", "ok");
+      showStatus("All "+total+" clips downloaded as a zip file! "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
     }
   } catch(e){
     showStatus("Zip download failed: " + e.message, "err");
@@ -5188,6 +5226,28 @@ window.downloadAllClips = async function(){
 window.downloadAllSvSearchResults = async function(){
   if(!window.currentSvSearchResults || !window.currentSvSearchResults.length){
     showStatus("No clips to download.", "err");
+    return;
+  }
+  var ALL_CLIPS_COST = 5000;
+  if(userCredits < ALL_CLIPS_COST && !userTeamId){
+    showStatus("Not enough credits. You need "+ALL_CLIPS_COST.toLocaleString()+" credits to download all clips. Please top up.", "err");
+    return;
+  }
+  try {
+    var token = await getToken();
+    var deductRes = await fetch(BACKEND+"/api/deduct-clip-credits", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify({ type: "all" })
+    });
+    var deductData = await deductRes.json();
+    if(!deductRes.ok){
+      showStatus(deductData.error || "Failed to process download.", "err");
+      return;
+    }
+    if(deductData.remaining !== undefined){ userCredits = deductData.remaining; renderCreditsBar(); }
+  } catch(deductErr){
+    showStatus("Failed to process download: " + deductErr.message, "err");
     return;
   }
   var total = window.currentSvSearchResults.length;
@@ -5222,7 +5282,7 @@ window.downloadAllSvSearchResults = async function(){
           data: base64data,
           directory: "DOCUMENTS"
         });
-        showStatus("Zip saved to your device! All "+total+" clips included.", "ok");
+                showStatus("Zip saved to your device! All "+total+" clips included. "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
         try {
           await Share.share({
             title: "Share your AudLabs video clips",
@@ -5240,10 +5300,10 @@ window.downloadAllSvSearchResults = async function(){
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(a.href);
-      showStatus("All "+total+" clips downloaded as a zip file!", "ok");
+      showStatus("All "+total+" clips downloaded as a zip file! "+ALL_CLIPS_COST.toLocaleString()+" credits used.", "ok");
     }
     } catch(e){
-    if(progressEl2) progressEl2.remove();
+    if(progressEl) progressEl.remove();
     showStatus("Zip download failed: " + e.message, "err");
   }
 };
@@ -5287,7 +5347,24 @@ html += '</div></div>';
 favResults.innerHTML = html;
 };
 window.downloadSvClip = async function(url){
+    var CLIP_COST = 1500;
+  if(userCredits < CLIP_COST && !userTeamId){
+    showStatus("Not enough credits. You need "+CLIP_COST.toLocaleString()+" credits to download this clip. Please top up.", "err");
+    return;
+  }
   try {
+    var token = await getToken();
+    var deductRes = await fetch(BACKEND+"/api/deduct-clip-credits", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","Authorization":"Bearer "+token},
+      body: JSON.stringify({ type: "single" })
+    });
+    var deductData = await deductRes.json();
+    if(!deductRes.ok){
+      showStatus(deductData.error || "Failed to process download.", "err");
+      return;
+    }
+    if(deductData.remaining !== undefined){ userCredits = deductData.remaining; renderCreditsBar(); }
     showStatus("Preparing download...", "");
     var response = await fetch(url);
     var blob = await response.blob();
@@ -5303,7 +5380,7 @@ window.downloadSvClip = async function(url){
           data: base64data,
           directory: "DOCUMENTS"
         });
-        showStatus("Video saved to your device!", "ok");
+                showStatus("Video saved to your device! "+CLIP_COST.toLocaleString()+" credits used.", "ok");
         try {
           await Share.share({
             title: "Share your AudLabs video clip",
@@ -5321,7 +5398,7 @@ window.downloadSvClip = async function(url){
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(a.href);
-      showStatus("Video downloaded!", "ok");
+            showStatus("Video downloaded! "+CLIP_COST.toLocaleString()+" credits used.", "ok");
     }
   } catch(e){
     showStatus("Download failed. Please try again.", "err");
